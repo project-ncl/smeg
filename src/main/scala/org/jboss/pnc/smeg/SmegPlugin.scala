@@ -13,7 +13,7 @@ object SmegPlugin extends AutoPlugin {
     val extracted = Project.extract(state)
 
     /*
-     * SBT Settings Override
+     * SBT Setting Override
      */
     mapOverloadedSysProps("overrideSetting") foreach (x => manipulations.overrideSetting(x._1, x._2))
 

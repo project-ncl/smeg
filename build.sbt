@@ -15,6 +15,5 @@ lazy val root = (project in file("."))
       scalaBinaryVersion.value match {
         case "2.12" => "1.2.8"
       }
-    },
-    libraryDependencies += scalaTest % Test
+    }
   )
