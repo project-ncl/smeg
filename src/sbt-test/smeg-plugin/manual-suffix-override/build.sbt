@@ -8,11 +8,10 @@ ThisBuild / organizationName := "example"
   
 lazy val root = (project in file("."))
   .settings(
-    name := "Smeg Manual Version and suffix Override Test",
+    name := "Smeg Manual Suffix Override Test",
 
     TaskKey[Unit]("runTest") := {
-      sys.props += "versionOverride" -> "10.10.10"
-      sys.props += "suffix" -> "redhat-10"
+      sys.props += "suffix" -> "redhat-5"
       Command.process("manipulate", state.value)
     },
 
