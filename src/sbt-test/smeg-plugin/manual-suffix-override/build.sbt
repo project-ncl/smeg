@@ -11,7 +11,7 @@ lazy val root = (project in file("."))
     name := "Smeg Manual Suffix Override Test",
 
     TaskKey[Unit]("runTest") := {
-      sys.props += "suffix" -> "redhat-5"
+      sys.props += "versionSuffix" -> "redhat-5"
       Command.process("manipulate", state.value)
     },
 

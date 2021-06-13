@@ -12,7 +12,7 @@ lazy val root = (project in file("."))
 
     TaskKey[Unit]("runTest") := {
       sys.props += "versionOverride" -> "10.10.10"
-      sys.props += "suffix" -> "redhat-10"
+      sys.props += "versionSuffix" -> "redhat-10"
       Command.process("manipulate", state.value)
     },
 
