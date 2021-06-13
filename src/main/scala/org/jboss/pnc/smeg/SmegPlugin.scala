@@ -21,7 +21,7 @@ object SmegPlugin extends AutoPlugin {
      * Version Override
      */
     val versionOverride = sys.props.get("versionOverride")
-    val suffix = sys.props.get("suffix")
+    val suffix = sys.props.get("versionSuffix")
     var version: String = null
     if (versionOverride.isDefined) {
       if (suffix.isDefined) {
