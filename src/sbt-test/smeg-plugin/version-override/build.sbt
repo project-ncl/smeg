@@ -1,6 +1,8 @@
 import scala.io.Source
 import scala.language.postfixOps
 
+Global / onChangedBuildSource := IgnoreSourceChanges
+
 ThisBuild / scalaVersion     := "2.13.5"
 ThisBuild / version          := "0.1.0"
 ThisBuild / organization     := "com.example"
