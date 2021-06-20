@@ -2,15 +2,21 @@ package org.jboss.pnc.smeg
 
 import sbt._
 import Keys._
-import Utils._
+import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations}
+import org.jboss.pnc.smeg.state._
+import org.jboss.pnc.smeg.util.PropFuncs._
 
 object SmegPlugin extends AutoPlugin {
+
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands += manipulate)
 
+  type ManipulationTask = State => State
+
+
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
+    val session = new ManipulationSession(state)
     val manipulations = new ManipulationSpec
-    val extracted = Project.extract(state)
 
     /*
      * SBT Setting Override
@@ -18,21 +24,9 @@ object SmegPlugin extends AutoPlugin {
     mapOverloadedSysProps("overrideSetting") foreach (x => manipulations.overrideSetting(x._1, x._2))
 
     /*
-     * Version Override
+     * Project Version override
      */
-    val versionOverride = sys.props.get("versionOverride")
-    val suffix = sys.props.get("versionSuffix")
-    var version: String = null
-    if (versionOverride.isDefined) {
-      if (suffix.isDefined) {
-        version = formatVersion(versionOverride.get, suffix.get)
-      } else {
-        version = versionOverride.get
-      }
-    } else if (suffix.isDefined) {
-      version = formatVersion(extracted.get(Keys.version), suffix.get)
-    }
-    manipulations.overrideSetting("version", version)
+    ProjectVersionManipulations.calculateAndSet(session, manipulations)
 
     /*
      * Apply manipulations

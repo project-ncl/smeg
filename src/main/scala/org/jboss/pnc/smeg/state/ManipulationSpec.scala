@@ -1,4 +1,4 @@
-package org.jboss.pnc.smeg
+package org.jboss.pnc.smeg.state
 
 class ManipulationSpec {
   private val manipulations = Seq.newBuilder[String]
