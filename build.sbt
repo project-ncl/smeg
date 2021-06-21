@@ -14,8 +14,19 @@ libraryDependencies ++= Seq(
 )
 
 excludeDependencies ++= Seq(
-  ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl")
+  ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
+  ExclusionRule("commons-logging", "commons-logging")
 )
+
+assembly / assemblyMergeStrategy := {
+  case x if (x.endsWith("javax.inject.Named")) => MergeStrategy.first
+  case x if (x.endsWith("beans.xml")) => MergeStrategy.first
+  case x if (x.endsWith("module-info.class")) => MergeStrategy.discard
+  case x =>
+    val oldStrategy = (assembly / assemblyMergeStrategy).value
+    oldStrategy(x)
+}
+
 
 lazy val root = (project in file("."))
   .enablePlugins(SbtPlugin)
