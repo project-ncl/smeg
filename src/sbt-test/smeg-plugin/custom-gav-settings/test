@@ -1,0 +1,6 @@
+# check if the file gets created
+> runTest
+$ exists manipulations.sbt
+
+# check if it says hello
+> verifyTest
