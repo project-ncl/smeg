@@ -2,7 +2,6 @@ package org.jboss.pnc.smeg
 
 import sbt._
 import Keys._
-import scala.collection.Map
 import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations}
 import org.jboss.pnc.smeg.state._
 import org.jboss.pnc.smeg.util.PropFuncs._
