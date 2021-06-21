@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
     baseVersion := "5.0.0",
     TaskKey[Unit]("runTest") := {
       sys.props += "versionIncrementalSuffix" -> "rebuild"
-      sys.props += "customVersionSetting" -> "baseVersion"
+      sys.props += "settingTransposition.version" -> "baseVersion"
       Command.process("manipulate", state.value)
     },
 
