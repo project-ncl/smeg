@@ -6,13 +6,12 @@ import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations
 import org.jboss.pnc.smeg.state._
 import org.jboss.pnc.smeg.util.PropFuncs._
 
+import scala.language.postfixOps
+
 object SmegPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands += manipulate)
-
-  type ManipulationTask = State => State
-
 
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
     val session = new ManipulationSession(state)

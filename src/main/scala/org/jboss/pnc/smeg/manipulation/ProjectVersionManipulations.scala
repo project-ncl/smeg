@@ -18,7 +18,7 @@ object ProjectVersionManipulations {
 
     val newVersion = calc.calculate(session.getRootProjectGav, props, candidates.toSet)
 
-    spec.overrideSetting("version", newVersion)
+    spec.overrideSetting(session.settingTranspositions.getOrElse("version", "version"), newVersion)
   }
 
   protected def RESTLookup(gavs: Set[GAV], restConfig: RestConfig): Map[GAV, String] = {
