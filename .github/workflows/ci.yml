@@ -1,0 +1,22 @@
+name: CI
+on:
+  pull_request:
+  push:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: setup
+        run: |
+          mkdir -p "$HOME/.sbt/1.0"
+          echo 'resolvers ++= Seq("Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots", "Artima" at "https://repo.artima.com/releases", "MRRC" at "https://maven.repository.redhat.com/ga/")' > "$HOME/.sbt/1.0/resolvers.sbt"
+        shell: bash
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+      - name: Build and Unit Test
+        run: sbt -v -Dfile.encoding=UTF8 "clean; compile; +test; scripted smeg-plugin/*" < /dev/null
+        shell: bash
