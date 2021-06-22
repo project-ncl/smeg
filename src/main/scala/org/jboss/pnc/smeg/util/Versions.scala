@@ -31,4 +31,6 @@ object Versions {
 
   def appendQualifierSuffix(version: String, suffix: String): String = Version.appendQualifierSuffix(version, suffix)
 
+  def splitQualifier(version: String): (String, String) = (Version.getMMM(version), Version.getQualifier(version))
+
 }
