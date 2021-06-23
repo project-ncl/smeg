@@ -4,7 +4,7 @@ import org.commonjava.maven.ext.core.state.RESTState
 import org.commonjava.maven.ext.io.rest.Translator
 
 import java.util.Properties
-import scala.collection.JavaConverters.mapAsJavaMap
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 case class RestConfig(
@@ -42,7 +42,7 @@ object RestConfig {
       mode = props.getProperty(REST_MODE),
       restMaxSize = props.getProperty(REST_MAX_SIZE, "-1").toInt,
       restMinSize = Try(props.getProperty(REST_MIN_SIZE).toInt).getOrElse(Translator.CHUNK_SPLIT_COUNT),
-      restHeaders = Map[String, String](),
+      restHeaders = RESTState.restHeaderParser(props.getProperty(REST_HEADERS, "")).asScala.toMap,
       restConnectionTimeout = Try(props.getProperty(REST_CONNECTION_TIMEOUT_SEC).toInt).getOrElse(Translator.DEFAULT_CONNECTION_TIMEOUT_SEC),
       restSocketRetry = Try(props.getProperty(REST_SOCKET_TIMEOUT_SEC).toInt).getOrElse(Translator.DEFAULT_SOCKET_TIMEOUT_SEC),
       restRetryDuration = Try(props.getProperty(REST_RETRY_DURATION_SEC).toInt).getOrElse(Translator.RETRY_DURATION_SEC)
