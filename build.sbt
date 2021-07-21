@@ -3,7 +3,7 @@ ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "org.jboss.pnc.smeg"
 ThisBuild / organizationName := "Project NCL"
 
-val versionPme = "4.4-SNAPSHOT"
+val versionPme = "4.4"
 
 libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
