@@ -9,14 +9,7 @@ case class GAV(groupId: String, artifactId: String, version: String) {
   override def toString: String = s"$groupId:$artifactId:$version"
 
 }
-/*
-def fromString(emailString: String): Option[Email] = {
-    emailString.split('@') match {
-      case Array(a, b) => Some(new Email(a, b))
-      case _ => None
-    }
-  }
- */
+
 object GAV {
   def apply(gav: String): Option[GAV] = gav.split(':') match {
     case Array(g, a, v) => Some(GAV(g, a, v))
