@@ -4,9 +4,10 @@ import org.jboss.pnc.smeg.model.GAV
 import org.jboss.pnc.smeg.rest.RestConfig
 import org.jboss.pnc.smeg.util.ManipulationException
 import sbt.internal.util.AttributeKey
-import sbt.{Keys, Project, SettingKey, State, TaskKey}
+import sbt.{Keys, Logger, Project, SettingKey, State, TaskKey}
 import SmegSystemProperties._
 import org.jboss.pnc.smeg.util.PropFuncs.mapOverloadedSysProps
+
 import scala.collection.Map
 
 class ManipulationSession(val sbtState: State) {
@@ -17,9 +18,9 @@ class ManipulationSession(val sbtState: State) {
 
   val settingTranspositions: Map[String, String] = mapOverloadedSysProps(SETTING_TRANSPOSITIONS)
 
-  def getRootProjectGav: GAV = {
-    getRootProjectGav(Keys.organization, Keys.name, Keys.version)
-  }
+  def getRootProjectGav: GAV = getRootProjectGav(Keys.organization, Keys.name, Keys.version)
+
+  def getLogger: Logger = sbtState.log
 
   private def getRootProjectGav(groupIdKey: SettingKey[String], artifactIdKey: SettingKey[String], versionKey: SettingKey[String]): GAV = {
     val groupId = getSettingOrThrow(groupIdKey.key.label)

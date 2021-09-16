@@ -8,15 +8,18 @@ import org.jboss.pnc.smeg.state._
 import org.jboss.pnc.smeg.util.PropFuncs._
 
 import scala.language.postfixOps
+import sbt.io.syntax.file
+
+import scala.xml.XML
+
 
 object SmegPlugin extends AutoPlugin {
 
   override def trigger = allRequirements
-  override lazy val buildSettings = Seq(commands += manipulate)
-  //val manipulationDisabled: TaskKey[Boolean] = TaskKey[Boolean](SmegKeys.manipulationDisabledKey)
-
+  override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
 
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
+    state.log.info("Smeg manipulations")
     if (!sys.props.getOrElse(MANIPULATION_DISABLE, "false").toBoolean) {
 
       val session = new ManipulationSession(state)
@@ -37,7 +40,34 @@ object SmegPlugin extends AutoPlugin {
        */
       Manipulator.writeManipulationSpec(manipulations)
     }
+    Command.process("reload", state)
+  }
 
+  lazy val writeReport = Command.command("writeReport") { (state: State) =>
+    val result = Project.runTask(Keys.makePom, state)
+
+    val pomPath = result.get._2.toEither.getOrElse(throw new Exception("Path to POM could not be extracted"))
+
+    val xmlPom = XML.loadFile(pomPath)
+
+    val groupId = (xmlPom \ "groupId").text
+    val artifactId = (xmlPom \ "artifactId").text
+    val version = (xmlPom \ "version").text
+
+    val json = s"""
+         |{
+         |  "VersioningState": {
+         |    "executionRootModified": {
+         |      "groupId": "${groupId}",
+         |      "artifactId": "${artifactId}",
+         |      "version": "${version}"
+         |    }
+         |  },
+         |  "RemovedRepositories": []
+         |}
+         |""".stripMargin.trim
+
+    IO.write(file("manipulations.json"), json)
     state
   }
 }
