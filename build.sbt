@@ -1,7 +1,11 @@
+import sbt.Keys.versionScheme
+
 ThisBuild / scalaVersion     := "2.12.13"
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "org.jboss.pnc.smeg"
 ThisBuild / organizationName := "Project NCL"
+
+ThisBuild / versionScheme := Some("semver-spec")
 
 val versionPme = "4.4"
 
@@ -38,3 +42,16 @@ lazy val root = (project in file("."))
       }
     }
   )
+
+ThisBuild / publishMavenStyle := true
+ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+
+ThisBuild / publishTo := {
+  if (isSnapshot.value) {
+    Some("Sonatype Nexus Repository Manager" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
+  } else {
+    None
+  }
+}
+
+

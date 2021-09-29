@@ -1,4 +1,4 @@
-name: main
+name: snapshot
 on:
   push:
     branches:
@@ -27,3 +27,6 @@ jobs:
       - name: Build and Unit Test
         run: sbt -v -Dfile.encoding=UTF8 "clean; compile; +test; scripted smeg-plugin/*" < /dev/null
         shell: bash
+      - name: Publish snapshot
+        shell: bash
+        run: sbt -v publish < /dev/null
