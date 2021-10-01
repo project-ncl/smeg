@@ -29,4 +29,9 @@ jobs:
         shell: bash
       - name: Publish snapshot
         shell: bash
-        run: sbt -v publish < /dev/null
+        run: >-
+          echo 'realm=Sonatype Nexus Repository Manager
+                host=repository.jboss.org
+                user=${{secret.SNAPSHOT_USER}}
+                password=${{secret.SNAPSHOT_PASSWORD}}' > "$HOME/.sbt/.credentials"
+          sbt -v publish < /dev/null
