@@ -1,4 +1,4 @@
-![build status](https://github.com/project-ncl/smeg/actions/workflows/main.yml/badge.svg)
+![build status](https://github.com/project-ncl/smeg/actions/workflows/snapshot.yml/badge.svg)
 # SMEg [Sbt Manipulator Extension pluGin]
 SMEg is an SBT manipulation tool in the style of PME that aims to keep a consistent API between the two tools. 
 
