@@ -18,7 +18,16 @@ class ManipulationSession(val sbtState: State) {
 
   val settingTranspositions: Map[String, String] = mapOverloadedSysProps(SETTING_TRANSPOSITIONS)
 
-  def getRootProjectGav: GAV = getRootProjectGav(Keys.organization, Keys.name, Keys.version)
+  def getRootProjectGav: GAV = {
+    val gav = getRootProjectGav(Keys.organization, Keys.name, Keys.version)
+
+    if (sys.props.contains(FORCE_ROOT_GA)) {
+      val ga = sys.props(FORCE_ROOT_GA).split(':');
+      GAV(ga(0),ga(1), gav.version)
+    } else {
+      gav
+    }
+  }
 
   def getLogger: Logger = sbtState.log
 

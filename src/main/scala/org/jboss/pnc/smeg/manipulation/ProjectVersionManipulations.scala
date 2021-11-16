@@ -2,7 +2,7 @@ package org.jboss.pnc.smeg.manipulation
 
 import org.jboss.pnc.smeg.model.GAV
 import org.jboss.pnc.smeg.rest.{RestClient, RestConfig}
-import org.jboss.pnc.smeg.state.SmegSystemProperties.VERSION_SUFFIX_SETTING
+import org.jboss.pnc.smeg.state.SmegSystemProperties.{FORCE_ROOT_GA, VERSION_SUFFIX_SETTING}
 import org.jboss.pnc.smeg.state.{ManipulationSession, ManipulationSpec}
 import org.jboss.pnc.smeg.util.Versions
 

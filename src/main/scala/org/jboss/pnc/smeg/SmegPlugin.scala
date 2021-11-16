@@ -50,16 +50,20 @@ object SmegPlugin extends AutoPlugin {
 
     val xmlPom = XML.loadFile(pomPath)
 
-    val groupId = (xmlPom \ "groupId").text
-    val artifactId = (xmlPom \ "artifactId").text
+//    val groupId = (xmlPom \ "groupId").text
+//    val artifactId = (xmlPom \ "artifactId").text
     val version = (xmlPom \ "version").text
+
+    val session = new ManipulationSession(state)
+
+    val rootGav = session.getRootProjectGav
 
     val json = s"""
          |{
          |  "VersioningState": {
          |    "executionRootModified": {
-         |      "groupId": "${groupId}",
-         |      "artifactId": "${artifactId}",
+         |      "groupId": "${rootGav.groupId}",
+         |      "artifactId": "${rootGav.artifactId}",
          |      "version": "${version}"
          |    }
          |  },

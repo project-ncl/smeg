@@ -1,0 +1,10 @@
+{
+  "VersioningState": {
+    "executionRootModified": {
+      "groupId": "real-group-id",
+      "artifactId": "real-artifact-id",
+      "version": "1.0.0"
+    }
+  },
+  "RemovedRepositories": []
+}
