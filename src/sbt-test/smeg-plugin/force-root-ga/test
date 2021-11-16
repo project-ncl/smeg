@@ -1,0 +1,6 @@
+# check if the file gets created
+> runTest
+$ exists manipulations.json
+
+# verify test run
+> verifyTest
