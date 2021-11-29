@@ -57,7 +57,7 @@ ThisBuild / publishTo := {
   if (isSnapshot.value) {
     Some("JBoss Nexus Snapshots" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
   } else {
-    Opts.resolver.sonatypeStaging
+    Some("Sonatype Stage" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
   }
 }
 
