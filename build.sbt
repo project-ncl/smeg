@@ -43,14 +43,21 @@ lazy val root = (project in file("."))
     }
   )
 
+homepage := Some(url("https://github.com/project-ncl/smeg"))
+scmInfo := Some(ScmInfo(url("https://github.com/project-ncl/smeg.git"),"git@github.com:project-ncl/smeg.git"))
+developers := List(Developer("acreasy",
+  "Alex Creasy",
+  "acreasy@redhat.com",
+  url("https://github.com/alexcreasy")))
+licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / publishMavenStyle := true
 ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 
 ThisBuild / publishTo := {
   if (isSnapshot.value) {
-    Some("Sonatype Nexus Repository Manager" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
+    Some("JBoss Nexus Snapshots" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
   } else {
-    None
+    Opts.resolver.sonatypeStaging
   }
 }
 
