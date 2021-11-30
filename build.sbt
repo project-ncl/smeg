@@ -51,10 +51,11 @@ developers := List(Developer("acreasy",
   url("https://github.com/alexcreasy")))
 licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 ThisBuild / publishMavenStyle := true
-ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
+ThisBuild / pomIncludeRepository := { _ => false }
 
 ThisBuild / publishTo := {
   if (isSnapshot.value) {
+    ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
     Some("JBoss Nexus Snapshots" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
   } else {
     Some("Sonatype Stage" at "https://oss.sonatype.org/service/local/staging/deploy/maven2")
