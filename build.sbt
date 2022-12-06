@@ -7,7 +7,7 @@ ThisBuild / organizationName := "Project NCL"
 
 ThisBuild / versionScheme := Some("semver-spec")
 
-val versionPme = "4.4"
+val versionPme = "4.14"
 
 libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
