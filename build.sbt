@@ -7,7 +7,18 @@ ThisBuild / organizationName := "Project NCL"
 
 ThisBuild / versionScheme := Some("semver-spec")
 
-val versionPme = "4.14"
+val versionPme = "4.16"
+
+lazy val openTelemetrySpecific = {
+  val version = "1.29.0"
+  Seq(
+    "io.opentelemetry" % "opentelemetry-bom" % version pomOnly(),
+    "io.opentelemetry" % "opentelemetry-api" % version,
+    "io.opentelemetry" % "opentelemetry-sdk" % version,
+    "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
+    "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
+  )
+}
 
 libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
@@ -16,6 +27,9 @@ libraryDependencies ++= Seq(
   "org.scalactic" %% "scalactic" % "3.2.9",
   "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
+libraryDependencies ++= openTelemetrySpecific
+//javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.29.0"
+//javaOptions += "-Dotel.javaagent.debug=true" //Debug OpenTelemetry Java agent
 
 excludeDependencies ++= Seq(
   ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
