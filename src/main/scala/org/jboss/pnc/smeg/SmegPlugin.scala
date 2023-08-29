@@ -23,7 +23,7 @@ import scala.collection.JavaConverters._
 object SmegPlugin extends AutoPlugin {
 
   private lazy val otel: OpenTelemetry = GlobalOpenTelemetry.get()
-  private lazy val tracer: Tracer = otel.getTracer("smeg")
+  private lazy val tracer: Tracer = otel.getTracer("pnc-smeg")
 
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
