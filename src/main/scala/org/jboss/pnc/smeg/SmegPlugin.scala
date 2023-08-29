@@ -1,42 +1,37 @@
 package org.jboss.pnc.smeg
 
-import io.opentelemetry.api.{GlobalOpenTelemetry, OpenTelemetry}
-import io.opentelemetry.api.trace.Tracer
-import io.opentelemetry.context.Context
-import io.opentelemetry.context.propagation.TextMapGetter
-import sbt._
+import io.opentelemetry.api.GlobalOpenTelemetry
+import io.opentelemetry.api.trace.{Span, Tracer}
+import sbt.{io, _}
 import Keys._
 import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations}
 import org.jboss.pnc.smeg.state.SmegSystemProperties.MANIPULATION_DISABLE
 import org.jboss.pnc.smeg.state._
 import org.jboss.pnc.smeg.util.PropFuncs._
-import org.jboss.pnc.smeg.util.Utils
+import org.jboss.pnc.smeg.util.{OTelCLIHelperW3cPropagation, Utils}
 
 import scala.language.postfixOps
 import sbt.io.syntax.file
 
-import java.lang
 import scala.xml.XML
-
 import scala.collection.JavaConverters._
+
 
 object SmegPlugin extends AutoPlugin {
 
-  private lazy val otel: OpenTelemetry = GlobalOpenTelemetry.get()
-  private lazy val tracer: Tracer = otel.getTracer("pnc-smeg")
+  private val tracer = initOtel("init")
 
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
 
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
 
-    val mdc = Utils.parseStringToMap(System.getProperty("restHeaders"))
-    val span = tracer.spanBuilder("manipulate").setParent(extractInvokerContext(mdc)).startSpan()
-
+    state.log.info("Smeg manipulations")
+    val span = tracer.spanBuilder("SmegPlugin.manipulate").startSpan
     try {
-      val ss = span.makeCurrent()
+      span.makeCurrent
+      Span.current.addEvent("Starting the work.")
 
-      state.log.info("Smeg manipulations")
       if (!sys.props.getOrElse(MANIPULATION_DISABLE, "false").toBoolean) {
 
         val session = new ManipulationSession(state)
@@ -59,17 +54,18 @@ object SmegPlugin extends AutoPlugin {
       }
       Command.process("reload", state)
     } finally {
-      span.end()
+      Span.current.addEvent("Finished working.")
+      span.end
     }
   }
 
   lazy val writeReport = Command.command("writeReport") { (state: State) =>
 
-    val mdc = Utils.parseStringToMap(System.getProperty("restHeaders"))
-    val span = tracer.spanBuilder("writeReport").setParent(extractInvokerContext(mdc)).startSpan()
-
+    state.log.info("Smeg writeReport")
+    val span = tracer.spanBuilder("SmegPlugin.writeReport").startSpan
     try {
-      val ss = span.makeCurrent()
+      span.makeCurrent
+      Span.current.addEvent("Starting the work.")
 
       val result = Project.runTask(Keys.makePom, state)
 
@@ -102,18 +98,20 @@ object SmegPlugin extends AutoPlugin {
       IO.write(file("manipulations.json"), json)
       state
     } finally {
-      span.end()
+      Span.current.addEvent("Finished working.")
+      span.end
     }
   }
 
-  private def extractInvokerContext(mdc: Map[String, String]): Context = {
-    val getter = new TextMapGetter[Map[String, String]]() {
-      override def get(carrier: Map[String, String], key: String): String = carrier.getOrElse(key, null)
-      override def keys(carrier: Map[String, String]): lang.Iterable[String] = asJavaIterable(carrier.keys)
+  private def initOtel(commandName: String): Tracer = {
+    var grpcEndpoint: String = null
+    if (sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
+      grpcEndpoint = sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
+    } else if (sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
+      grpcEndpoint = sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
     }
-    otel
-      .getPropagators()
-      .getTextMapPropagator()
-      .extract(Context.current(), mdc, getter)
+    val mdc = Utils.parseStringToMap(sys.props("restHeaders"))
+    new OTelCLIHelperW3cPropagation().startOTel("manipulate", commandName, mdc.asJava, grpcEndpoint);
   }
+
 }
