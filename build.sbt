@@ -16,7 +16,6 @@ lazy val openTelemetrySpecific = {
     "io.opentelemetry" % "opentelemetry-api" % version,
     "io.opentelemetry" % "opentelemetry-sdk" % version,
     "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
-    "io.opentelemetry" % "opentelemetry-sdk-extension-autoconfigure" % version,
     "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
   )
 }
