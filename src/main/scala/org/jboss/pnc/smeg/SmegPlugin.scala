@@ -8,7 +8,7 @@ import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations
 import org.jboss.pnc.smeg.state.SmegSystemProperties.MANIPULATION_DISABLE
 import org.jboss.pnc.smeg.state._
 import org.jboss.pnc.smeg.util.PropFuncs._
-import org.jboss.pnc.smeg.util.{W3cParentContextExtractor, Utils}
+import org.jboss.pnc.smeg.util.{OpenTelemetryUtils, Utils, W3cParentContextExtractor}
 
 import scala.language.postfixOps
 import sbt.io.syntax.file
@@ -106,6 +106,15 @@ object SmegPlugin extends AutoPlugin {
   }
 
   private def getParentContext(): Context = {
+
+    var grpcEndpoint: String = null
+    if (sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
+      grpcEndpoint = sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
+    } else if (sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
+      grpcEndpoint = sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
+    }
+    OpenTelemetryUtils.initGlobal("pnc-smeg", grpcEndpoint);
+
     val mdc = Utils.parseStringToMap(sys.props("restHeaders"))
     new W3cParentContextExtractor().startOTel(mdc.asJava);
   }
