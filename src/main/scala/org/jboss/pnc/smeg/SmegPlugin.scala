@@ -19,7 +19,7 @@ import scala.collection.JavaConverters._
 
 object SmegPlugin extends AutoPlugin {
 
-  private val propagatedContext: Context = getParentContext()
+  private val propagatedContext = initOpenTelemetry()
 
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
@@ -105,18 +105,17 @@ object SmegPlugin extends AutoPlugin {
     }
   }
 
-  private def getParentContext(): Context = {
-
+  private def initOpenTelemetry(): Context = {
     var grpcEndpoint: String = null
     if (sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
       grpcEndpoint = sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
     } else if (sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
       grpcEndpoint = sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
     }
-    OpenTelemetryUtils.initGlobal("pnc-smeg", grpcEndpoint);
+    OpenTelemetryUtils.initGlobal("pnc-smeg", grpcEndpoint)
 
     val mdc = Utils.parseStringToMap(sys.props("restHeaders"))
-    new W3cParentContextExtractor().startOTel(mdc.asJava);
+    new W3cParentContextExtractor().startOTel(mdc.asJava)
   }
 
 }

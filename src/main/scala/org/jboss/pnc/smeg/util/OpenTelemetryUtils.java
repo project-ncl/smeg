@@ -2,6 +2,7 @@ package org.jboss.pnc.smeg.util;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.propagation.W3CTraceContextPropagator;
 import io.opentelemetry.context.propagation.ContextPropagators;
 import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
@@ -14,10 +15,15 @@ import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
 public class OpenTelemetryUtils {
+
+    private static Logger log = LoggerFactory.getLogger(OpenTelemetryUtils.class);
+
     public static void initGlobal(String serviceName, String exporterEndpoint) {
         Resource resource = Resource
             .getDefault()
@@ -34,6 +40,9 @@ public class OpenTelemetryUtils {
             .setTracerProvider(sdkTracerProvider)
             .setPropagators(ContextPropagators.create(W3CTraceContextPropagator.getInstance()))
             .buildAndRegisterGlobal();
+
+        log.debug("Initialized and registered OpenTelemetry.");
+
     }
 
     @NotNull
