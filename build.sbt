@@ -1,7 +1,7 @@
 import sbt.Keys.versionScheme
 
 ThisBuild / scalaVersion     := "2.12.13"
-ThisBuild / version          := "0.2.0.1-SNAPSHOT"
+ThisBuild / version          := "0.2.0.2-SNAPSHOT"
 ThisBuild / organization     := "org.jboss.pnc.smeg"
 ThisBuild / organizationName := "Project NCL"
 
