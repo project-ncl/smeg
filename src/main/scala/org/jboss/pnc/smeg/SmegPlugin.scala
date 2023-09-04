@@ -23,7 +23,7 @@ object SmegPlugin extends AutoPlugin {
   override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
 
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
-    initOpenTelemetry()
+    initOpenTelemetry(state)
     val span = GlobalOpenTelemetry
       .getTracer("pnc-smeg")
       .spanBuilder("SmegPlugin.manipulate")
@@ -59,7 +59,7 @@ object SmegPlugin extends AutoPlugin {
   }
 
   lazy val writeReport = Command.command("writeReport") { (state: State) =>
-    initOpenTelemetry()
+    initOpenTelemetry(state)
     val span = GlobalOpenTelemetry
       .getTracer("pnc-smeg")
       .spanBuilder("SmegPlugin.writeReport")
@@ -103,8 +103,14 @@ object SmegPlugin extends AutoPlugin {
     }
   }
 
-  private def initOpenTelemetry(): Unit = {
+  private def initOpenTelemetry(state: State): Unit = {
     if (!OTelCLIHelper.otelEnabled()) {
+      state.log.info("Initializing otel ...")
+      state.log.debug("Env.TRACEPARENT: " + sys.env.get("TRACEPARENT").getOrElse(None))
+      state.log.debug("Env.TRACESTATE: " + sys.env.get("TRACESTATE").getOrElse(None))
+      state.log.debug("Env.TRACE_ID: " + sys.env.get("TRACE_ID").getOrElse(None))
+      state.log.debug("Env.SPAN_ID: " + sys.env.get("SPAN_ID").getOrElse(None))
+
       val grpcEndpoint: Option[String] = sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT")
         .orElse(sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
