@@ -1,34 +1,32 @@
 package org.jboss.pnc.smeg
 
 import io.opentelemetry.api.GlobalOpenTelemetry
-import io.opentelemetry.context.Context
+import io.opentelemetry.sdk.trace.`export`.SpanExporter
 import sbt._
 import Keys._
+import com.redhat.resilience.otel.OTelCLIHelper
 import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations}
 import org.jboss.pnc.smeg.state.SmegSystemProperties.MANIPULATION_DISABLE
 import org.jboss.pnc.smeg.state._
 import org.jboss.pnc.smeg.util.PropFuncs._
-import org.jboss.pnc.smeg.util.{OpenTelemetryUtils, Utils, W3cParentContextExtractor}
+import org.jboss.pnc.smeg.util.otel.NoopSpanExporter
 
 import scala.language.postfixOps
 import sbt.io.syntax.file
 
 import scala.xml.XML
-import scala.collection.JavaConverters._
 
 
 object SmegPlugin extends AutoPlugin {
-
-  private val propagatedContext = initOpenTelemetry()
 
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
 
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
+    initOpenTelemetry()
     val span = GlobalOpenTelemetry
       .getTracer("pnc-smeg")
       .spanBuilder("SmegPlugin.manipulate")
-      .setParent(propagatedContext)
       .startSpan()
     try {
       span.makeCurrent
@@ -61,10 +59,10 @@ object SmegPlugin extends AutoPlugin {
   }
 
   lazy val writeReport = Command.command("writeReport") { (state: State) =>
+    initOpenTelemetry()
     val span = GlobalOpenTelemetry
       .getTracer("pnc-smeg")
       .spanBuilder("SmegPlugin.writeReport")
-      .setParent(propagatedContext)
       .startSpan()
     try {
       span.makeCurrent
@@ -105,17 +103,22 @@ object SmegPlugin extends AutoPlugin {
     }
   }
 
-  private def initOpenTelemetry(): Context = {
-    var grpcEndpoint: String = null
-    if (sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
-      grpcEndpoint = sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
-    } else if (sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").nonEmpty) {
-      grpcEndpoint = sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT").get
-    }
-    OpenTelemetryUtils.initGlobal("pnc-smeg", grpcEndpoint)
+  private def initOpenTelemetry(): Unit = {
+    if (!OTelCLIHelper.otelEnabled()) {
+      val grpcEndpoint: Option[String] = sys.props.get("OTEL_EXPORTER_OTLP_ENDPOINT")
+        .orElse(sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
-    val mdc = Utils.parseStringToMap(sys.props("restHeaders"))
-    new W3cParentContextExtractor().startOTel(mdc.asJava)
+      val spanProcessor = OTelCLIHelper.defaultSpanProcessor(getSpanExporter(grpcEndpoint))
+      OTelCLIHelper.startOTel("pnc-smeg", spanProcessor)
+    }
   }
+
+  private def getSpanExporter(maybeGrpcEndpoint: Option[String]): SpanExporter = {
+    maybeGrpcEndpoint match {
+      case Some(endpoint) => OTelCLIHelper.defaultSpanExporter(endpoint)
+      case None => NoopSpanExporter.getInstance()
+    }
+  }
+
 
 }
