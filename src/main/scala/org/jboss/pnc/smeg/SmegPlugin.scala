@@ -3,6 +3,7 @@ package org.jboss.pnc.smeg
 import io.opentelemetry.api.GlobalOpenTelemetry
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.sdk.trace.`export`.SpanExporter
+import io.opentelemetry.sdk.trace.SpanProcessor
 import sbt._
 import Keys._
 import com.redhat.resilience.otel.OTelCLIHelper
@@ -15,13 +16,16 @@ import org.jboss.pnc.smeg.util.otel.NoopSpanExporter
 import scala.language.postfixOps
 import sbt.io.syntax.file
 
+import java.util.concurrent.TimeUnit
 import scala.xml.XML
 
 
 object SmegPlugin extends AutoPlugin {
 
+  val OTEL_TRACKER_NAME = "pnc-smeg"
   override def trigger = allRequirements
   override lazy val buildSettings = Seq(commands ++= Seq(manipulate, writeReport))
+  var spanProcessor: SpanProcessor = null
 
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
     val span = startSpan(state, "SmegPlugin.manipulate")
@@ -51,6 +55,8 @@ object SmegPlugin extends AutoPlugin {
       Command.process("reload", state)
     } finally {
       span.end
+      // make sure data is flushed before command exits
+      spanProcessor.forceFlush().join(10, TimeUnit.SECONDS)
     }
   }
 
@@ -91,11 +97,12 @@ object SmegPlugin extends AutoPlugin {
       state
     } finally {
       span.end
+      // make sure data is flushed before command exits
+      spanProcessor.forceFlush().join(10, TimeUnit.SECONDS)
     }
   }
 
   private def startSpan(state: State, commandName: String): Span = {
-    val trackerName = "pnc-smeg"
     if (!OTelCLIHelper.otelEnabled()) {
       state.log.info("Initializing otel ...")
       state.log.info("Env.TRACEPARENT: " + sys.env.get("TRACEPARENT").getOrElse(None))
@@ -107,12 +114,13 @@ object SmegPlugin extends AutoPlugin {
         .orElse(sys.env.get("OTEL_EXPORTER_OTLP_ENDPOINT"))
 
       val spanProcessor = OTelCLIHelper.defaultSpanProcessor(getSpanExporter(grpcEndpoint))
-      OTelCLIHelper.startOTel(trackerName, commandName, spanProcessor)
+      this.spanProcessor = spanProcessor;
+      OTelCLIHelper.startOTel(OTEL_TRACKER_NAME, commandName, spanProcessor)
     }
 
     if (!Span.current().isRecording) {
       val span = GlobalOpenTelemetry
-        .getTracer(trackerName)
+        .getTracer(OTEL_TRACKER_NAME)
         .spanBuilder(commandName)
         .startSpan()
       span.makeCurrent()
