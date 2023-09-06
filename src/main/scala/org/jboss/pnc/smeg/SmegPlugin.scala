@@ -30,7 +30,7 @@ object SmegPlugin extends AutoPlugin {
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
     val span = startSpan(state, "SmegPlugin.manipulate")
     try {
-      state.log.info("Smeg manipulations Ver. 0.2.0.2-001")
+      state.log.info("Smeg manipulations Ver. 0.2.0.3-001")
 
       if (!sys.props.getOrElse(MANIPULATION_DISABLE, "false").toBoolean) {
 
@@ -61,7 +61,7 @@ object SmegPlugin extends AutoPlugin {
   }
 
   lazy val writeReport = Command.command("writeReport") { (state: State) =>
-    val span = startSpan(state, "SmegPlugin.writeReport")
+    val span = startSpan(state, "SmegPlugin.writeReport Ver. 0.2.0.3-001")
     try {
       state.log.info("Smeg writeReport")
 
