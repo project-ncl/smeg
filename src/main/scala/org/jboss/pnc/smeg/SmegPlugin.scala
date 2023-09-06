@@ -30,7 +30,7 @@ object SmegPlugin extends AutoPlugin {
   lazy val manipulate = Command.command("manipulate") { (state: State) =>
     val span = startSpan(state, "SmegPlugin.manipulate")
     try {
-      state.log.info("Smeg manipulations")
+      state.log.info("Smeg manipulations Ver. 0.2.0.2-001")
 
       if (!sys.props.getOrElse(MANIPULATION_DISABLE, "false").toBoolean) {
 
@@ -116,6 +116,8 @@ object SmegPlugin extends AutoPlugin {
       val spanProcessor = OTelCLIHelper.defaultSpanProcessor(getSpanExporter(grpcEndpoint))
       this.spanProcessor = spanProcessor;
       OTelCLIHelper.startOTel(OTEL_TRACKER_NAME, commandName, spanProcessor)
+    } else {
+      state.log.info("Otel already initialized.")
     }
 
     if (!Span.current().isRecording) {
@@ -125,6 +127,8 @@ object SmegPlugin extends AutoPlugin {
         .startSpan()
       span.makeCurrent()
     }
+    state.log.info("Otel running with traceId " + Span.current.getSpanContext.getTraceId +
+      " spanId " + Span.current.getSpanContext.getSpanId)
     Span.current()
   }
 
@@ -134,6 +138,4 @@ object SmegPlugin extends AutoPlugin {
       case None => NoopSpanExporter.getInstance()
     }
   }
-
-
 }
