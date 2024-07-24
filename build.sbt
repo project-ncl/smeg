@@ -1,7 +1,8 @@
 import sbt.Keys.versionScheme
+import sbt._
 
 ThisBuild / scalaVersion     := "2.12.13"
-ThisBuild / version          := "0.3.0.0-SNAPSHOT"
+ThisBuild / version          := "0.3.1.0-SNAPSHOT"
 ThisBuild / organization     := "org.jboss.pnc.smeg"
 ThisBuild / organizationName := "Project NCL"
 
@@ -20,7 +21,23 @@ lazy val openTelemetrySpecific = {
   )
 }
 
+// Define local resolver to fix SBT 1.9.9 issue
+val localRepoDir = file("project/hack/repository")
+resolvers += "Local Repository" at s"file://${localRepoDir.getAbsolutePath}"
+
+libraryDependencies += "org.jboss.da" % "reports-model" % "2.1.0"
+
+// Define resolvers
+resolvers ++= Seq(
+  "RedHat GA" at "https://maven.repository.redhat.com/ga/",
+  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  "Artima Maven" at "https://repo.artima.com/releases",
+  "Central" at "https://repo1.maven.org/maven2"
+)
+
+// Define dependencies
 libraryDependencies ++= Seq(
+  "org.jboss.bom" % "eap-runtime-artifacts" % "7.3.1.GA",
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
   "org.commonjava.maven.ext" % "pom-manipulation-core" % versionPme,
   "org.commonjava.maven.ext" % "pom-manipulation-io" % versionPme,
@@ -34,6 +51,11 @@ libraryDependencies ++= openTelemetrySpecific
 excludeDependencies ++= Seq(
   ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
   ExclusionRule("commons-logging", "commons-logging")
+)
+
+// Exclude specific transitive dependencies globally (to solve SBT 1.9.9 issues)
+excludeDependencies ++= Seq(
+  ExclusionRule("org.jboss.da", "reports-model")
 )
 
 assembly / assemblyMergeStrategy := {
