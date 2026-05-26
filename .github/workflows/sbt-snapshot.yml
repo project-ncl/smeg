@@ -1,0 +1,17 @@
+name: Build snapshot version and upload
+
+permissions: {}
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  call-snapshot-job:
+    uses: project-ncl/shared-github-actions/.github/workflows/sbt-snapshot.yml@3b0266cacc8d9b44f6cbaf3bf52419d81510a81f # main
+    with:
+      project_name: "project-ncl/smeg"
+      build_args: "clean; compile; +test; scripted smeg-plugin/*"
+    secrets:
+      SNAPSHOT_USER: ${{ secrets.SNAPSHOT_USER }}
+      SNAPSHOT_PASSWORD: ${{ secrets.SNAPSHOT_PASSWORD }}

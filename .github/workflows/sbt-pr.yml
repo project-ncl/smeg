@@ -1,0 +1,15 @@
+name: SBT CI
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  call-sbt-ci:
+    uses: project-ncl/shared-github-actions/.github/workflows/sbt-ci.yml@3b0266cacc8d9b44f6cbaf3bf52419d81510a81f # main
+    with:
+      build_args: "clean; compile; +test; scripted smeg-plugin/*"
+      upload_artifacts: true
