@@ -1,0 +1,36 @@
+name: Mend CLI scan for SBT
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "0 22 * * 0"
+
+permissions:
+  contents: read
+  actions: read
+  checks: write
+  pull-requests: write
+  security-events: write
+
+jobs:
+  build:
+    uses: project-ncl/shared-github-actions/.github/workflows/sbt-ci.yml@0fd979fcdd90cf1b62e6410221d64efd6b470865 # v0.0.21
+    with:
+      build_args: "clean; compile; +test; scripted smeg-plugin/*"
+      upload_artifacts: true
+
+  call-mend-ci:
+    needs: build
+    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@0fd979fcdd90cf1b62e6410221d64efd6b470865 # v0.0.21
+    with:
+      project_name: "project-ncl/smeg"
+      SCA: true
+      SAST: true
+    secrets:
+      MEND_URL: ${{ secrets.MEND_URL }}
+      MEND_USER_KEY: ${{ secrets.MEND_USER_KEY }}
+      MEND_EMAIL: ${{ secrets.MEND_EMAIL }}
+      MEND_ORGNAME: ${{ secrets.MEND_ORGNAME }}
+      MEND_PRODUCTNAME: ${{ secrets.MEND_PRODUCTNAME }}
