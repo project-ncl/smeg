@@ -82,6 +82,10 @@ lazy val root = (project in file("."))
 ThisBuild / publishMavenStyle := true
 ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 
+// POM needed by Mend SCA
+ThisBuild / pomAllRepositories := true
+makePom / artifactPath := baseDirectory.value / "pom.xml"
+
 ThisBuild / publishTo := {
   if (isSnapshot.value) {
     Some("Sonatype Nexus Repository Manager" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
