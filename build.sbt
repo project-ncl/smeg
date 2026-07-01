@@ -21,6 +21,8 @@ lazy val openTelemetrySpecific = {
   )
 }
 
+// test
+
 // Define local resolver to fix SBT 1.9.9 issue
 val localRepoDir = file("project/hack/repository")
 resolvers += "Local Repository" at s"file://${localRepoDir.getAbsolutePath}"
