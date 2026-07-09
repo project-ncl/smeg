@@ -1,7 +1,7 @@
 package org.jboss.pnc.smeg.manipulation
 
-import org.commonjava.maven.atlas.ident.ref.{ProjectRef, SimpleProjectVersionRef}
-import org.commonjava.maven.ext.core.state.VersioningState
+import org.commonjava.atlas.maven.ident.ref.{ProjectRef, SimpleProjectVersionRef}
+import org.jboss.pnc.mavenmanipulator.core.state.VersioningState
 import org.jboss.pnc.smeg.UnitSpec
 import org.jboss.pnc.smeg.model.GAV
 

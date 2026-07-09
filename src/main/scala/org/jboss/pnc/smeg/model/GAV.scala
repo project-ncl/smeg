@@ -1,6 +1,6 @@
 package org.jboss.pnc.smeg.model
 
-import org.commonjava.maven.atlas.ident.ref.{ProjectVersionRef, SimpleProjectVersionRef}
+import org.commonjava.atlas.maven.ident.ref.{ProjectVersionRef, SimpleProjectVersionRef}
 
 case class GAV(groupId: String, artifactId: String, version: String) {
 

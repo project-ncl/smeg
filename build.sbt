@@ -8,7 +8,7 @@ ThisBuild / organizationName := "Project NCL"
 
 ThisBuild / versionScheme := Some("semver-spec")
 
-val versionPme = "4.16"
+val versionPme = "5.4-SNAPSHOT"
 
 lazy val openTelemetrySpecific = {
   val version = "1.29.0"
@@ -39,8 +39,8 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.jboss.bom" % "eap-runtime-artifacts" % "7.3.1.GA" pomOnly(),
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
-  "org.commonjava.maven.ext" % "pom-manipulation-core" % versionPme,
-  "org.commonjava.maven.ext" % "pom-manipulation-io" % versionPme,
+  "org.jboss.pnc.maven-manipulator" % "pom-manipulation-core" % versionPme,
+  "org.jboss.pnc.maven-manipulator" % "pom-manipulation-io" % versionPme,
   "org.scalactic" %% "scalactic" % "3.2.9",
   "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
@@ -50,7 +50,11 @@ libraryDependencies ++= openTelemetrySpecific
 
 excludeDependencies ++= Seq(
   ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
-  ExclusionRule("commons-logging", "commons-logging")
+  ExclusionRule("commons-logging", "commons-logging"),
+  // Java 8 incompatible deps coming from PME
+  ExclusionRule("ch.qos.logback", "logback-classic"),
+  ExclusionRule("ch.qos.logback", "logback-core"),
+  ExclusionRule("org.commonjava.maven.galley")
 )
 
 // Exclude specific transitive dependencies globally (to solve SBT 1.9.9 issues)

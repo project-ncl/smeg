@@ -1,6 +1,6 @@
 package org.jboss.pnc.smeg.rest
 
-import org.commonjava.maven.ext.io.rest.Translator
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator
 import org.jboss.pnc.smeg.UnitSpec
 
 import java.util.Properties

@@ -1,6 +1,6 @@
 package org.jboss.pnc.smeg.util
 
-import org.commonjava.maven.ext.core.impl.Version
+import org.jboss.pnc.mavenmanipulator.common.Version
 import scala.collection.JavaConverters.setAsJavaSet
 
 object Versions {
