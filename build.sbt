@@ -37,7 +37,7 @@ resolvers ++= Seq(
 
 // Define dependencies
 libraryDependencies ++= Seq(
-  "org.jboss.bom" % "eap-runtime-artifacts" % "7.3.1.GA",
+  "org.jboss.bom" % "eap-runtime-artifacts" % "7.3.1.GA" pomOnly(),
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
   "org.commonjava.maven.ext" % "pom-manipulation-core" % versionPme,
   "org.commonjava.maven.ext" % "pom-manipulation-io" % versionPme,
@@ -83,8 +83,23 @@ ThisBuild / publishMavenStyle := true
 ThisBuild / credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
 
 // POM needed by Mend SCA
-ThisBuild / pomAllRepositories := true
 makePom / artifactPath := baseDirectory.value / "pom.xml"
+pomIncludeRepository := { _ => false }
+pomExtra :=
+  <repositories>
+    <repository>
+      <id>RedHat GA</id>
+      <url>https://maven.repository.redhat.com/ga/</url>
+      <releases><enabled>true</enabled></releases>
+      <snapshots><enabled>false</enabled></snapshots>
+    </repository>
+    <repository>
+      <id>Sonatype Snapshots</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <releases><enabled>false</enabled></releases>
+      <snapshots><enabled>true</enabled></snapshots>
+    </repository>
+  </repositories>
 
 ThisBuild / publishTo := {
   if (isSnapshot.value) {
