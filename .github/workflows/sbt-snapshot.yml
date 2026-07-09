@@ -1,6 +1,7 @@
 name: Build snapshot version and upload
 
-permissions: {}
+permissions:
+  contents: read
 
 on:
   push:
