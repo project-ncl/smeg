@@ -16,8 +16,7 @@ lazy val openTelemetrySpecific = {
     "io.opentelemetry" % "opentelemetry-bom" % version pomOnly(),
     "io.opentelemetry" % "opentelemetry-api" % version,
     "io.opentelemetry" % "opentelemetry-sdk" % version,
-    "io.opentelemetry" % "opentelemetry-exporter-otlp" % version,
-    "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % version % "runtime"
+    "io.opentelemetry" % "opentelemetry-exporter-otlp" % version
   )
 }
 
@@ -45,8 +44,6 @@ libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
 libraryDependencies ++= openTelemetrySpecific
-//javaAgents += "io.opentelemetry.javaagent" % "opentelemetry-javaagent" % "1.29.0"
-//javaOptions += "-Dotel.javaagent.debug=true" //Debug OpenTelemetry Java agent
 
 excludeDependencies ++= Seq(
   ExclusionRule("org.apache.logging.log4j", "log4j-slf4j-impl"),
