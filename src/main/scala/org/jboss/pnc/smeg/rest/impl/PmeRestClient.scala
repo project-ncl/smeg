@@ -1,6 +1,6 @@
 package org.jboss.pnc.smeg.rest.impl
 
-import org.commonjava.maven.ext.io.rest.{DefaultTranslator, Translator}
+import org.jboss.pnc.mavenmanipulator.io.rest.{DefaultTranslator, Translator}
 import org.jboss.pnc.smeg.model.GAV
 import org.jboss.pnc.smeg.rest.{RestClient, RestConfig}
 

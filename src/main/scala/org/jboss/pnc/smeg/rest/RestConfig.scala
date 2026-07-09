@@ -1,7 +1,7 @@
 package org.jboss.pnc.smeg.rest
 
-import org.commonjava.maven.ext.core.state.RESTState
-import org.commonjava.maven.ext.io.rest.Translator
+import org.jboss.pnc.mavenmanipulator.core.state.RESTState
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator
 
 import java.util.Properties
 import scala.collection.JavaConverters._

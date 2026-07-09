@@ -6,7 +6,7 @@ import io.opentelemetry.sdk.trace.`export`.SpanExporter
 import io.opentelemetry.sdk.trace.SpanProcessor
 import sbt._
 import Keys._
-import com.redhat.resilience.otel.OTelCLIHelper
+import org.jboss.pnc.otel.OTelCLIHelper
 import org.jboss.pnc.smeg.manipulation.{Manipulator, ProjectVersionManipulations}
 import org.jboss.pnc.smeg.state.SmegSystemProperties.MANIPULATION_DISABLE
 import org.jboss.pnc.smeg.state._
