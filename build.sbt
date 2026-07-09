@@ -30,7 +30,7 @@ libraryDependencies += "org.jboss.da" % "reports-model" % "2.1.0"
 // Define resolvers
 resolvers ++= Seq(
   "RedHat GA" at "https://maven.repository.redhat.com/ga/",
-  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  "Sonatype Snapshots" at "https://central.sonatype.com/repository/maven-snapshots",
   "Artima Maven" at "https://repo.artima.com/releases",
   "Central" at "https://repo1.maven.org/maven2"
 )
@@ -95,7 +95,7 @@ pomExtra :=
     </repository>
     <repository>
       <id>Sonatype Snapshots</id>
-      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+      <url>https://central.sonatype.com/repository/maven-snapshots</url>
       <releases><enabled>false</enabled></releases>
       <snapshots><enabled>true</enabled></snapshots>
     </repository>

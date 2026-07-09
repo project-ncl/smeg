@@ -21,7 +21,7 @@ Change the final string to match the version you wish to use
 ## Extra repositories
 Sbt will need access to some additional repositories in order to satisfy all of SMEg's dependencies.
 
- - Sonatype Snapshots: https://oss.sonatype.org/content/repositories/snapshots
+ - Sonatype Snapshots: https://central.sonatype.com/repository/maven-snapshots
  - Artima Maven Releases: https://repo.artima.com/releases
  - MRRC: https://maven.repository.redhat.com/ga/
 
@@ -29,7 +29,7 @@ You can enable them in the usual way for your build or globally via adding the f
 
 ```
 resolvers ++= Seq(
-  "Sonatype Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
+  "Sonatype Snapshots" at "https://central.sonatype.com/repository/maven-snapshots",
   "Artima Maven" at "https://repo.artima.com/releases",
   "MRRC" at "https://maven.repository.redhat.com/ga/"
 )
