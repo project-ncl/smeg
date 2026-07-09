@@ -24,8 +24,6 @@ jobs:
       project_name: "project-ncl/smeg"
       SCA: true
       SAST: true
-      # hide the sbt manifests so Mend uses POM instead
-      SCA_EXCLUDES: "**/*.sbt,project/**,src/sbt-test/**"
       triggering_run_id: ${{ github.event.workflow_run.id }}
       pr_feedback: true
     secrets:
