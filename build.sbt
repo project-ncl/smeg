@@ -104,7 +104,7 @@ pomExtra :=
 
 ThisBuild / publishTo := {
   if (isSnapshot.value) {
-    Some("Sonatype Nexus Repository Manager" at "https://repository.jboss.org/nexus/content/repositories/snapshots/")
+    Some("Sonatype Nexus Repository Manager" at "https://central.sonatype.com/repository/maven-snapshots/")
   } else {
     None
   }
