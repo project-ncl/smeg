@@ -16,14 +16,14 @@ permissions:
 
 jobs:
   build:
-    uses: project-ncl/shared-github-actions/.github/workflows/sbt-ci.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/sbt-ci.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # v0.0.22
     with:
       build_args: "clean; compile; +test; makePom; scripted smeg-plugin/*"
       upload_artifacts: true
 
   call-mend-ci:
     needs: build
-    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/mend-ci.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # v0.0.22
     with:
       project_name: "project-ncl/smeg"
       SCA: true
