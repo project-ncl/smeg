@@ -9,7 +9,7 @@ on:
 
 jobs:
   call-snapshot-job:
-    uses: project-ncl/shared-github-actions/.github/workflows/sbt-snapshot.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # main
+    uses: project-ncl/shared-github-actions/.github/workflows/sbt-snapshot.yml@a27e6fba6b28bbb96881ec096e9c8ea5a538f481 # v0.0.22
     with:
       project_name: "project-ncl/smeg"
       build_args: "clean; compile; +test; scripted smeg-plugin/*"
