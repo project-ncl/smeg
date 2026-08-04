@@ -14,5 +14,5 @@ jobs:
       project_name: "project-ncl/smeg"
       build_args: "clean; compile; +test; scripted smeg-plugin/*"
     secrets:
-      SNAPSHOT_USER: ${{ secrets.SNAPSHOT_USER }}
-      SNAPSHOT_PASSWORD: ${{ secrets.SNAPSHOT_PASSWORD }}
+      SNAPSHOT_USER: ${{ secrets.SONATYPE_USERNAME }}
+      SNAPSHOT_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
