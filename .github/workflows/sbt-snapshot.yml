@@ -13,6 +13,7 @@ jobs:
     with:
       project_name: "project-ncl/smeg"
       build_args: "clean; compile; +test; scripted smeg-plugin/*"
+      snapshot_deploy_command: "sbt -v aetherDeploy"
     secrets:
       SNAPSHOT_USER: ${{ secrets.SONATYPE_USERNAME }}
       SNAPSHOT_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
