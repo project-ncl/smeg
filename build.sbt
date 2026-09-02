@@ -24,7 +24,7 @@ lazy val openTelemetrySpecific = {
 val localRepoDir = file("project/hack/repository")
 resolvers += "Local Repository" at s"file://${localRepoDir.getAbsolutePath}"
 
-libraryDependencies += "org.jboss.da" % "reports-model" % "2.1.0"
+libraryDependencies += "org.jboss.da" % "reports-model" % "3.0.8"
 
 // Define resolvers
 resolvers ++= Seq(
