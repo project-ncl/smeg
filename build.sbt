@@ -36,7 +36,7 @@ resolvers ++= Seq(
 
 // Define dependencies
 libraryDependencies ++= Seq(
-  "org.jboss.bom" % "eap-runtime-artifacts" % "7.3.1.GA" pomOnly(),
+  "org.jboss.bom" % "eap-runtime-artifacts" % "7.4.25.GA" pomOnly(),
   "com.softwaremill.sttp.client3" %% "core" % "3.11.0",
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-core" % versionPme,
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-io" % versionPme,
