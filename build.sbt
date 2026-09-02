@@ -40,7 +40,7 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.3.5",
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-core" % versionPme,
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-io" % versionPme,
-  "org.scalactic" %% "scalactic" % "3.2.9",
+  "org.scalactic" %% "scalactic" % "3.2.20",
   "org.scalatest" %% "scalatest" % "3.2.9" % "test"
 )
 libraryDependencies ++= openTelemetrySpecific
