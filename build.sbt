@@ -8,7 +8,7 @@ ThisBuild / organizationName := "Project NCL"
 
 ThisBuild / versionScheme := Some("semver-spec")
 
-val versionPme = "5.4-SNAPSHOT"
+val versionPme = "5.4"
 
 lazy val openTelemetrySpecific = {
   val version = "1.29.0"
