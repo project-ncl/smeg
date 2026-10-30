@@ -40,6 +40,8 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.11.0",
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-core" % versionPme,
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-io" % versionPme,
+  // used directly by GroovyScripts; same Groovy line as PME (Groovy 4 would clash with it on groovy.lang.*)
+  "org.codehaus.groovy" % "groovy" % "3.0.25",
   "org.scalactic" %% "scalactic" % "3.2.20",
   "org.scalatest" %% "scalatest" % "3.2.20" % "test"
 )
