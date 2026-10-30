@@ -59,25 +59,38 @@ $ sbt manipulate -Dmanipulation.disable=true
 ```
 
 ##### Groovy Scripts
-Groovy scripts can modify the project before sbt loads it, in the style of PME's `PREPARSE` scripts. List their URLs (comma separated) in the property `groovyScripts`:
+Groovy scripts can modify the project before sbt loads it, like PME and GME [groovy scripts](https://release-engineering.github.io/pom-manipulation-ext/guide/groovy.html). List their URLs (comma separated) in the property `groovyScripts`:
 
 ```
 $ sbt manipulate -DgroovyScripts=https://example.com/fix-build.groovy
 ```
 
-Scripts are compiled with `org.jboss.pnc.smeg.groovy.BaseScript` as their base class, so they don't need any import and can use:
-
- - `baseDir`: root directory of the project
- - `logger`: logger with slf4j-style `{}` placeholders (`logger.info("updated {}", file)`)
- - `userProperties`: the system properties of the sbt invocation
+Scripts use the same annotations as PME and GME, with `org.jboss.pnc.smeg.groovy.BaseScript` (an implementation of PME's `SBTBaseScript`) as the base script:
 
 ```groovy
-def props = new File(baseDir, "project/build.properties")
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
+import org.jboss.pnc.mavenmanipulator.core.groovy.SMEGBaseScript
+import org.jboss.pnc.smeg.groovy.BaseScript
+
+@InvocationPoint(invocationPoint = InvocationStage.PREPARSE)
+@SMEGBaseScript BaseScript smeg
+
+def props = new File(smeg.baseDir, "project/build.properties")
 props.text = "sbt.version=1.10.4\n"
-logger.info("updated {}", props)
+smeg.logger.info("updated {}", props)
 ```
 
-The scripts run once per sbt invocation, and a failing script fails the invocation. They are skipped when `manipulation.disable` is set.
+The base script provides:
+
+ - `getBaseDir()`: root directory of the project
+ - `getLogger()`: SLF4J logger
+ - `getUserProperties()`: the system properties of the sbt invocation
+ - `getInvocationStage()`: the current stage
+ - `getFileIO()`: PME's `FileIO`
+ - `getRESTAPI()`: PME's REST `Translator`, configured by the `restURL` property
+
+Only the `PREPARSE` stage is supported (scripts with `ALL` run in it too); scripts for other stages are ignored. The scripts run once per sbt invocation, and a failing script fails the invocation. They are skipped when `manipulation.disable` is set.
 
 They have to run before sbt reads the project's own build definition, so they are triggered from the global plugins build. Next to the global plugin installation, register SMEG for the global plugins build itself and add the trigger:
 

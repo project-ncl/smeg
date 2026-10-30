@@ -74,8 +74,10 @@ class PmeRestClient(translator: Translator) extends RestClient {
 }
 
 object PmeRestClient {
-  def apply(restConfig: RestConfig): PmeRestClient = {
-    val translator: Translator = new DefaultTranslator(
+  def apply(restConfig: RestConfig): PmeRestClient = new PmeRestClient(translator(restConfig))
+
+  def translator(restConfig: RestConfig): Translator = {
+    new DefaultTranslator(
       restConfig.restUrl.get,
       restConfig.restMaxSize,
       restConfig.restMinSize,
@@ -86,6 +88,5 @@ object PmeRestClient {
       restConfig.restSocketRetry,
       restConfig.restRetryDuration
     )
-    new PmeRestClient(translator)
   }
 }

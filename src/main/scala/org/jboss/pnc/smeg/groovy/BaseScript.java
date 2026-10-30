@@ -1,38 +1,102 @@
 package org.jboss.pnc.smeg.groovy;
 
-import groovy.lang.Script;
-
 import java.io.File;
 import java.util.Properties;
 
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException;
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage;
+import org.jboss.pnc.mavenmanipulator.core.groovy.SBTBaseScript;
+import org.jboss.pnc.mavenmanipulator.io.FileIO;
+import org.jboss.pnc.mavenmanipulator.io.rest.Translator;
+import org.slf4j.Logger;
+
 /**
- * Base class of every Groovy script run by SMEG. Scripts don't need to declare it: SMEG compiles them with this
- * class as the script base class, so {@code getBaseDir()}, {@code getLogger()} and {@code getUserProperties()} (or
- * the {@code baseDir}, {@code logger}, {@code userProperties} properties) are directly available.
+ * Abstract class that should be used by developers wishing to implement groovy scripts for SMEG, declared with
+ * {@code @SMEGBaseScript BaseScript smeg}.
  */
-public abstract class BaseScript extends Script {
+public abstract class BaseScript extends SBTBaseScript {
 
-    private File baseDir;
-    private ScriptLogger logger;
-    private Properties userProperties;
+    private Logger logger;
 
-    void init(File baseDir, ScriptLogger logger, Properties userProperties) {
-        this.baseDir = baseDir;
-        this.logger = logger;
-        this.userProperties = userProperties;
-    }
+    private File basedir;
 
-    /** Root directory of the sbt project being manipulated. */
-    public File getBaseDir() {
-        return baseDir;
-    }
+    private Properties properties;
 
-    public ScriptLogger getLogger() {
+    private InvocationStage stage;
+
+    private FileIO fileIO;
+
+    private Translator restAPI;
+
+    public Logger getLogger() {
         return logger;
     }
 
-    /** System properties passed to the sbt invocation (e.g. via {@code -Dkey=value}). */
+    /**
+     * Get the working directory (the execution root).
+     *
+     * @return a {@link java.io.File} reference.
+     */
+    @Override
+    public File getBaseDir() {
+        return basedir;
+    }
+
+    /**
+     * Get the user properties
+     *
+     * @return a {@link java.util.Properties} reference.
+     */
+    @Override
     public Properties getUserProperties() {
-        return userProperties;
+        return properties;
+    }
+
+    /**
+     * Get the current stage
+     *
+     * @return a {@link InvocationStage} reference.
+     */
+    @Override
+    public InvocationStage getInvocationStage() {
+        return stage;
+    }
+
+    @Override
+    public FileIO getFileIO() {
+        return fileIO;
+    }
+
+    @Override
+    public Translator getRESTAPI() throws ManipulationException {
+        if (restAPI == null) {
+            throw new ManipulationException("No REST API available: restURL is not set");
+        }
+        return restAPI;
+    }
+
+    /**
+     * Internal use only - {@link GroovyScripts} uses this to initialise the values
+     *
+     * @param logger the logger
+     * @param stage the current invocation stage
+     * @param rootDir the root directory of the project.
+     * @param properties the current configuration properties
+     * @param restAPI the REST API Translator interface ; may be null.
+     */
+    public void setValues(
+            Logger logger,
+            InvocationStage stage,
+            File rootDir,
+            Properties properties,
+            Translator restAPI) {
+        this.logger = logger;
+        this.stage = stage;
+        this.basedir = rootDir;
+        this.properties = properties;
+        this.restAPI = restAPI;
+        this.fileIO = new FileIO();
+
+        logger.info("Injecting values for stage {} with basedir {}", stage, rootDir);
     }
 }

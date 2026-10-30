@@ -1,5 +1,6 @@
 package org.jboss.pnc.smeg.groovy
 
+import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException
 import org.jboss.pnc.smeg.UnitSpec
 import org.jboss.pnc.smeg.state.SmegSystemProperties.{GROOVY_SCRIPTS, MANIPULATION_DISABLE}
 
@@ -19,6 +20,16 @@ class GroovyScriptsTest extends UnitSpec {
     touchedProps.foreach(sys.props.remove)
   }
 
+  private def header(stage: String = "PREPARSE") =
+    s"""import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
+       |import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
+       |import org.jboss.pnc.mavenmanipulator.core.groovy.SMEGBaseScript
+       |import org.jboss.pnc.smeg.groovy.BaseScript
+       |
+       |@InvocationPoint(invocationPoint = InvocationStage.$stage)
+       |@SMEGBaseScript BaseScript smeg
+       |""".stripMargin
+
   private def fixture = new {
     val baseDir: File = Files.createTempDirectory("smeg-groovy-base").toFile
     val scriptsDir: File = Files.createTempDirectory("smeg-groovy-scripts").toFile
@@ -30,28 +41,66 @@ class GroovyScriptsTest extends UnitSpec {
     }
 
     def out: String = new String(Files.readAllBytes(new File(baseDir, "out.txt").toPath), UTF_8)
+
+    def hasOut: Boolean = new File(baseDir, "out.txt").exists
   }
 
   behavior of "GroovyScripts"
 
-  it should "run the scripts in order with baseDir, logger and userProperties available" in {
+  it should "run the PREPARSE scripts in order with the base script values set" in {
     val f = fixture
-    val first = f.script("first.groovy",
-      """new File(baseDir, "out.txt") << "first:${userProperties.getProperty('smeg.test.value')}\n"
-        |logger.info("first script ran in {}", baseDir)""".stripMargin)
-    val second = f.script("second-script.groovy",
-      """new File(getBaseDir(), "out.txt") << "second\n" """)
+    val first = f.script("first.groovy", header() +
+      """new File(smeg.baseDir, "out.txt") << "first:${smeg.userProperties.getProperty('smeg.test.value')}:${smeg.invocationStage}\n"
+        |assert smeg.fileIO != null
+        |smeg.logger.info("first script ran in {}", smeg.baseDir)""".stripMargin)
+    val second = f.script("second-script.groovy", header("ALL") +
+      """new File(smeg.getBaseDir(), "out.txt") << "second\n" """)
     sys.props("smeg.test.value") = "42"
     sys.props(GROOVY_SCRIPTS) = s"$first, $second"
 
     GroovyScripts.preparse(f.baseDir)
 
-    f.out shouldBe "first:42\nsecond\n"
+    f.out shouldBe "first:42:PREPARSE\nsecond\n"
+  }
+
+  it should "accept the legacy annotations" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = f.script("legacy.groovy",
+      """import org.commonjava.maven.ext.core.groovy.InvocationPoint
+        |import org.commonjava.maven.ext.core.groovy.InvocationStage
+        |import org.commonjava.maven.ext.core.groovy.SMEGBaseScript
+        |import org.jboss.pnc.smeg.groovy.BaseScript
+        |
+        |@InvocationPoint(invocationPoint = InvocationStage.PREPARSE)
+        |@SMEGBaseScript BaseScript smeg
+        |new File(smeg.baseDir, "out.txt") << "legacy"
+        |""".stripMargin)
+
+    GroovyScripts.preparse(f.baseDir)
+
+    f.out shouldBe "legacy"
+  }
+
+  it should "skip scripts for other invocation points" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = f.script("first.groovy", header("FIRST") + """new File(smeg.baseDir, "out.txt") << "x" """)
+
+    GroovyScripts.preparse(f.baseDir)
+
+    f.hasOut shouldBe false
+  }
+
+  it should "require the InvocationPoint annotation" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = f.script("no-stage.groovy", """println "x" """)
+
+    the[ManipulationException] thrownBy GroovyScripts.preparse(f.baseDir) should have message
+      "Mandatory annotation '@InvocationPoint(invocationPoint = ' not declared"
   }
 
   it should "run the scripts only once per JVM" in {
     val f = fixture
-    sys.props(GROOVY_SCRIPTS) = f.script("once.groovy", """new File(baseDir, "out.txt") << "x" """)
+    sys.props(GROOVY_SCRIPTS) = f.script("once.groovy", header() + """new File(smeg.baseDir, "out.txt") << "x" """)
 
     GroovyScripts.preparse(f.baseDir)
     GroovyScripts.preparse(f.baseDir)
@@ -61,31 +110,35 @@ class GroovyScriptsTest extends UnitSpec {
 
   it should "not run anything when manipulation is disabled" in {
     val f = fixture
-    sys.props(GROOVY_SCRIPTS) = f.script("disabled.groovy", """new File(baseDir, "out.txt") << "x" """)
+    sys.props(GROOVY_SCRIPTS) = f.script("disabled.groovy", header() + """new File(smeg.baseDir, "out.txt") << "x" """)
     sys.props(MANIPULATION_DISABLE) = "true"
 
     GroovyScripts.preparse(f.baseDir)
 
-    new File(f.baseDir, "out.txt").exists shouldBe false
+    f.hasOut shouldBe false
   }
 
   it should "fail when a script fails" in {
     val f = fixture
-    sys.props(GROOVY_SCRIPTS) = f.script("broken.groovy", """throw new IllegalStateException("boom")""")
+    sys.props(GROOVY_SCRIPTS) = f.script("broken.groovy", header() + """throw new IllegalStateException("boom")""")
 
-    an[IllegalStateException] should be thrownBy GroovyScripts.preparse(f.baseDir)
+    val e = the[ManipulationException] thrownBy GroovyScripts.preparse(f.baseDir)
+    e.getCause shouldBe an[IllegalStateException]
     sys.props.get(GroovyScripts.PREPARSE_DONE) shouldBe None
   }
 
-  "scriptClassName" should "turn a script URL into a valid class name" in {
-    GroovyScripts.scriptClassName("https://host/path/sb-artemis-edits.groovy") shouldBe "sb_artemis_edits"
-    GroovyScripts.scriptClassName("https://host/raw/fix.groovy?ref=main") shouldBe "fix"
-    GroovyScripts.scriptClassName("https://host/1.groovy") shouldBe "_1"
+  it should "fail when a script cannot be read" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = new File(f.scriptsDir, "missing.groovy").toURI.toString
+
+    a[ManipulationException] should be thrownBy GroovyScripts.preparse(f.baseDir)
   }
 
-  "ScriptLogger.format" should "fill {} placeholders in order" in {
-    ScriptLogger.format("a {} b {}", "x", Int.box(2)) shouldBe "a x b 2"
-    ScriptLogger.format("no args {}") shouldBe "no args {}"
-    ScriptLogger.format("extra {}", "x", "y") shouldBe "extra x"
+  it should "fail on getRESTAPI when restURL is not set" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = f.script("rest.groovy", header() + "smeg.getRESTAPI()")
+
+    the[ManipulationException] thrownBy GroovyScripts.preparse(f.baseDir) should have message
+      "No REST API available: restURL is not set"
   }
 }
