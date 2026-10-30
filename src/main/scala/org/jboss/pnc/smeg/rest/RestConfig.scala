@@ -39,7 +39,7 @@ object RestConfig {
     RestConfig(
       restUrl = Option(props.getProperty(REST_URL)),
       brewPullActive = props.getProperty(REST_BREW_PULL_ACTIVE, "false").toBoolean,
-      mode = props.getProperty(REST_MODE),
+      mode = props.getProperty(REST_MODE, ""),
       restMaxSize = props.getProperty(REST_MAX_SIZE, "-1").toInt,
       restMinSize = Try(props.getProperty(REST_MIN_SIZE).toInt).getOrElse(Translator.CHUNK_SPLIT_COUNT),
       restHeaders = RESTState.restHeaderParser(props.getProperty(REST_HEADERS, "")).asScala.toMap,
