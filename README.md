@@ -58,6 +58,60 @@ Usage:
 $ sbt manipulate -Dmanipulation.disable=true
 ```
 
+##### Groovy Scripts
+Groovy scripts can modify the project before sbt loads it, like PME and GME [groovy scripts](https://release-engineering.github.io/pom-manipulation-ext/guide/groovy.html). List their URLs (comma separated) in the property `groovyScripts`:
+
+```
+$ sbt manipulate -DgroovyScripts=https://example.com/fix-build.groovy
+```
+
+Scripts use the same annotations as PME and GME, with `org.jboss.pnc.smeg.groovy.BaseScript` (an implementation of PME's `SBTBaseScript`) as the base script:
+
+```groovy
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationPoint
+import org.jboss.pnc.mavenmanipulator.core.groovy.InvocationStage
+import org.jboss.pnc.mavenmanipulator.core.groovy.SMEGBaseScript
+import org.jboss.pnc.smeg.groovy.BaseScript
+
+@InvocationPoint(invocationPoint = InvocationStage.PREPARSE)
+@SMEGBaseScript BaseScript smeg
+
+def props = new File(smeg.baseDir, "project/build.properties")
+props.text = "sbt.version=1.10.4\n"
+smeg.logger.info("updated {}", props)
+```
+
+The base script provides:
+
+ - `getBaseDir()`: root directory of the project
+ - `getLogger()`: SLF4J logger
+ - `getUserProperties()`: the system properties of the sbt invocation
+ - `getInvocationStage()`: the current stage
+ - `getFileIO()`: PME's `FileIO`
+ - `getRESTAPI()`: PME's REST `Translator`, configured by the `restURL` property
+
+The logger prints to the console; its debug messages, and SMEG's own debug output about the scripts, are shown with `-Dsmeg.debug=true`.
+
+Only the `PREPARSE` stage is supported (scripts with `ALL` run in it too); scripts for other stages are ignored. The scripts run once per sbt invocation, and a failing script fails the invocation. They are skipped when `manipulation.disable` is set.
+
+They have to run before sbt reads the project's own build definition, so they are triggered from the global plugins build. Next to the global plugin installation, register SMEG for the global plugins build itself and add the trigger:
+
+`~/.sbt/1.0/plugins/project/plugins.sbt`:
+```
+addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.1.0")
+```
+
+`~/.sbt/1.0/plugins/smeg-groovy.sbt`:
+```
+libraryDependencies ++= { org.jboss.pnc.smeg.groovy.GroovyScripts.preparse(); Seq.empty[ModuleID] }
+```
+
+Because they run first, scripts can also repair builds that sbt 1.x cannot load at all. For example, a project still on sbt 0.13 with a `project/Build.scala` can be migrated by a script when sbt 1.x is forced on the command line, which takes precedence over `project/build.properties`:
+
+```
+$ sbt -Dsbt.version=1.10.4 -DgroovyScripts=https://example.com/port-to-sbt1.groovy manipulate
+```
+
 #### Project Version Manipulation
 
 ##### Automatic version increment

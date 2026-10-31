@@ -8,7 +8,7 @@ ThisBuild / organizationName := "Project NCL"
 
 ThisBuild / versionScheme := Some("semver-spec")
 
-val versionPme = "5.4-SNAPSHOT"
+val versionPme = "5.10"
 
 lazy val openTelemetrySpecific = {
   val version = "1.29.0"
@@ -40,6 +40,11 @@ libraryDependencies ++= Seq(
   "com.softwaremill.sttp.client3" %% "core" % "3.11.0",
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-core" % versionPme,
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-io" % versionPme,
+  // used directly by GroovyScripts; same Groovy line as PME (Groovy 4 would clash with it on groovy.lang.*)
+  "org.codehaus.groovy" % "groovy" % "3.0.25",
+  // commons-logging API for PME's REST client (httpclient), routed to slf4j: it used to come from Galley,
+  // which is excluded below, and commons-logging itself is excluded as it breaks on sbt's older log4j
+  "org.slf4j" % "jcl-over-slf4j" % "2.0.18",
   "org.scalactic" %% "scalactic" % "3.2.20",
   "org.scalatest" %% "scalatest" % "3.2.20" % "test"
 )
