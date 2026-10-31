@@ -5,16 +5,16 @@ SMEg is an SBT manipulation tool in the style of PME that aims to keep a consist
 ## Installation in a project
 Add the following to your `./project/plugins.sbt` file:
 
-`addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.1.0")`
+`addSbtPlugin("org.jboss.pnc" %% "smeg-plugin" % "0.4.0.0")`
 
-Change the final string to match the version you wish to use
+Change the final string to match the version you wish to use. Releases are published as `org.jboss.pnc`, snapshots as `org.jboss.pnc.smeg`.
 
 ## Installation as a global plugin
 Create the following file:
 `~/.sbt/1.0/plugins/build.sbt`
 
 With the following content:
-`addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.1.0")`
+`addSbtPlugin("org.jboss.pnc" %% "smeg-plugin" % "0.4.0.0")`
 
 Change the final string to match the version you wish to use
 
@@ -59,7 +59,7 @@ $ sbt manipulate -Dmanipulation.disable=true
 ```
 
 ##### Groovy Scripts
-Groovy scripts can modify the project before sbt loads it, like PME and GME [groovy scripts](https://release-engineering.github.io/pom-manipulation-ext/guide/groovy.html). List their URLs (comma separated) in the property `groovyScripts`:
+Groovy scripts (since 0.4.0.0) can modify the project before sbt loads it, like PME and GME [groovy scripts](https://release-engineering.github.io/pom-manipulation-ext/guide/groovy.html). List their URLs (comma separated) in the property `groovyScripts`:
 
 ```
 $ sbt manipulate -DgroovyScripts=https://example.com/fix-build.groovy
@@ -98,7 +98,7 @@ They have to run before sbt reads the project's own build definition, so they ar
 
 `~/.sbt/1.0/plugins/project/plugins.sbt`:
 ```
-addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.1.0")
+addSbtPlugin("org.jboss.pnc" %% "smeg-plugin" % "0.4.0.0")
 ```
 
 `~/.sbt/1.0/plugins/smeg-groovy.sbt`:
