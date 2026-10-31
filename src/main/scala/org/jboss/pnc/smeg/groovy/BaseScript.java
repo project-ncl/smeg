@@ -82,6 +82,7 @@ public abstract class BaseScript extends SBTBaseScript {
      * @param stage the current invocation stage
      * @param rootDir the root directory of the project.
      * @param properties the current configuration properties
+     * @param fileIO the FileIO instance used to read the scripts
      * @param restAPI the REST API Translator interface ; may be null.
      */
     public void setValues(
@@ -89,13 +90,14 @@ public abstract class BaseScript extends SBTBaseScript {
             InvocationStage stage,
             File rootDir,
             Properties properties,
+            FileIO fileIO,
             Translator restAPI) {
         this.logger = logger;
         this.stage = stage;
         this.basedir = rootDir;
         this.properties = properties;
+        this.fileIO = fileIO;
         this.restAPI = restAPI;
-        this.fileIO = new FileIO();
 
         logger.info("Injecting values for stage {} with basedir {}", stage, rootDir);
     }

@@ -127,6 +127,24 @@ class GroovyScriptsTest extends UnitSpec {
     sys.props.get(GroovyScripts.PREPARSE_DONE) shouldBe None
   }
 
+  it should "fail when a script assert fails" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = f.script("assert.groovy", header() + "assert 1 == 2")
+
+    val e = the[ManipulationException] thrownBy GroovyScripts.preparse(f.baseDir)
+    e.getMessage shouldBe "Problem running script"
+    e.getCause shouldBe an[AssertionError]
+  }
+
+  it should "fail when a script does not compile" in {
+    val f = fixture
+    sys.props(GROOVY_SCRIPTS) = f.script("syntax.groovy", header() + "def x = ")
+
+    val e = the[ManipulationException] thrownBy GroovyScripts.preparse(f.baseDir)
+    e.getMessage should startWith("Unable to parse script")
+    e.getCause shouldBe a[org.codehaus.groovy.control.CompilationFailedException]
+  }
+
   it should "fail when a script cannot be read" in {
     val f = fixture
     sys.props(GROOVY_SCRIPTS) = new File(f.scriptsDir, "missing.groovy").toURI.toString

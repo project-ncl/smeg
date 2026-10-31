@@ -90,6 +90,8 @@ The base script provides:
  - `getFileIO()`: PME's `FileIO`
  - `getRESTAPI()`: PME's REST `Translator`, configured by the `restURL` property
 
+The logger prints to the console; its debug messages, and SMEG's own debug output about the scripts, are shown with `-Dsmeg.debug=true`.
+
 Only the `PREPARSE` stage is supported (scripts with `ALL` run in it too); scripts for other stages are ignored. The scripts run once per sbt invocation, and a failing script fails the invocation. They are skipped when `manipulation.disable` is set.
 
 They have to run before sbt reads the project's own build definition, so they are triggered from the global plugins build. Next to the global plugin installation, register SMEG for the global plugins build itself and add the trigger:

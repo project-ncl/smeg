@@ -1,7 +1,7 @@
 package org.jboss.pnc.smeg.groovy
 
 import groovy.lang.{Binding, GroovyShell, Script}
-import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.{CompilationFailedException, CompilerConfiguration}
 import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException
 import org.jboss.pnc.mavenmanipulator.core.groovy.{InvocationPoint, InvocationStage}
 import org.jboss.pnc.mavenmanipulator.io.FileIO
@@ -13,6 +13,7 @@ import org.slf4j.Logger
 
 import java.io.{File, IOException}
 import java.util.Properties
+import scala.util.control.NonFatal
 
 /**
  * Runs the Groovy scripts listed (comma separated) in the `groovyScripts` system property, the same way as PME and
@@ -68,7 +69,8 @@ object GroovyScripts {
       val script =
         try groovyShell.parse(scriptFile)
         catch {
-          case e: IOException => throw new ManipulationException(s"Unable to parse script $scriptFile", e)
+          case e @ (_: IOException | _: CompilationFailedException) =>
+            throw new ManipulationException(s"Unable to parse script $scriptFile", e)
         }
       val stage = invocationStage(script)
 
@@ -77,7 +79,7 @@ object GroovyScripts {
         // Inject the values via a new BaseScript so user's can have completion.
         script match {
           case baseScript: BaseScript =>
-            baseScript.setValues(logger, targetStage, baseDir, properties, restAPI(properties))
+            baseScript.setValues(logger, targetStage, baseDir, properties, fileIO, restAPI(properties))
           case _ =>
             throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script)
         }
@@ -86,7 +88,8 @@ object GroovyScripts {
           script.run()
         } catch {
           case e: ManipulationException => throw e
-          case e: Exception => throw new ManipulationException("Problem running script", e)
+          // NonFatal also covers Errors such as the PowerAssertionError thrown by a failed Groovy assert
+          case NonFatal(e) => throw new ManipulationException("Problem running script", e)
         }
       } else {
         logger.debug(s"Ignoring script $script as invocation point $stage does not match.")
