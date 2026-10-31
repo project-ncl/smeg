@@ -2,7 +2,7 @@ package org.jboss.pnc.smeg.groovy
 
 import org.jboss.pnc.mavenmanipulator.common.exception.ManipulationException
 import org.jboss.pnc.smeg.UnitSpec
-import org.jboss.pnc.smeg.state.SmegSystemProperties.{GROOVY_SCRIPTS, MANIPULATION_DISABLE}
+import org.jboss.pnc.smeg.state.SmegSystemProperties.{GROOVY_SCRIPTS, GROOVY_SCRIPTS_DONE, MANIPULATION_DISABLE}
 
 import java.io.File
 import java.nio.charset.StandardCharsets.UTF_8
@@ -10,7 +10,7 @@ import java.nio.file.Files
 
 class GroovyScriptsTest extends UnitSpec {
 
-  private val touchedProps = Seq(GROOVY_SCRIPTS, MANIPULATION_DISABLE, GroovyScripts.PREPARSE_DONE, "smeg.test.value")
+  private val touchedProps = Seq(GROOVY_SCRIPTS, MANIPULATION_DISABLE, GROOVY_SCRIPTS_DONE, "smeg.test.value")
 
   before {
     touchedProps.foreach(sys.props.remove)
@@ -124,7 +124,7 @@ class GroovyScriptsTest extends UnitSpec {
 
     val e = the[ManipulationException] thrownBy GroovyScripts.preparse(f.baseDir)
     e.getCause shouldBe an[IllegalStateException]
-    sys.props.get(GroovyScripts.PREPARSE_DONE) shouldBe None
+    sys.props.get(GROOVY_SCRIPTS_DONE) shouldBe None
   }
 
   it should "fail when a script assert fails" in {
@@ -150,6 +150,15 @@ class GroovyScriptsTest extends UnitSpec {
     sys.props(GROOVY_SCRIPTS) = new File(f.scriptsDir, "missing.groovy").toURI.toString
 
     a[ManipulationException] should be thrownBy GroovyScripts.preparse(f.baseDir)
+  }
+
+  it should "not run any script when a later one cannot be downloaded" in {
+    val f = fixture
+    val first = f.script("first.groovy", header() + """new File(smeg.baseDir, "out.txt") << "x" """)
+    sys.props(GROOVY_SCRIPTS) = s"$first, http://localhost:1/missing.groovy"
+
+    a[ManipulationException] should be thrownBy GroovyScripts.preparse(f.baseDir)
+    f.hasOut shouldBe false
   }
 
   it should "fail on getRESTAPI when restURL is not set" in {

@@ -8,7 +8,7 @@ import org.jboss.pnc.mavenmanipulator.io.FileIO
 import org.jboss.pnc.mavenmanipulator.io.rest.Translator
 import org.jboss.pnc.smeg.rest.RestConfig
 import org.jboss.pnc.smeg.rest.impl.PmeRestClient
-import org.jboss.pnc.smeg.state.SmegSystemProperties.{GROOVY_SCRIPTS, MANIPULATION_DISABLE}
+import org.jboss.pnc.smeg.state.SmegSystemProperties.{GROOVY_SCRIPTS, GROOVY_SCRIPTS_DONE, MANIPULATION_DISABLE}
 import org.slf4j.Logger
 
 import java.io.{File, IOException}
@@ -25,20 +25,17 @@ import scala.util.control.NonFatal
  */
 object GroovyScripts {
 
-  /** Set once the scripts have run: sbt evaluates the global plugins build several times in the same JVM. */
-  val PREPARSE_DONE = "smeg.groovyScripts.done"
-
   private val logger: Logger = new ConsoleLogger
 
   def preparse(): Unit = preparse(new File(sys.props("user.dir")))
 
   def preparse(baseDir: File): Unit = {
     val disabled = sys.props.getOrElse(MANIPULATION_DISABLE, "false").toBoolean
-    if (disabled || sys.props.get(PREPARSE_DONE).contains("true")) {
+    if (disabled || sys.props.get(GROOVY_SCRIPTS_DONE).contains("true")) {
       return
     }
     runCustomGroovyScript(InvocationStage.PREPARSE, baseDir, System.getProperties)
-    sys.props(PREPARSE_DONE) = "true"
+    sys.props(GROOVY_SCRIPTS_DONE) = "true"
   }
 
   /**
@@ -55,6 +52,7 @@ object GroovyScripts {
       return
     }
     val fileIO = new FileIO()
+    // Download all the scripts before running any, so that an unreachable script fails before the project is modified.
     val groovyFiles = scripts.map { script =>
       logger.info("Attempting to read URL {}", script)
       try fileIO.resolveURL(script)
@@ -62,6 +60,7 @@ object GroovyScripts {
         case e: IOException => throw new ManipulationException(s"Unable to read groovy script $script", e)
       }
     }
+    val translator = restAPI(properties)
 
     for (scriptFile <- groovyFiles) {
       // We use the current class' classloader so the script has access to this plugin's API and the groovy API.
@@ -79,7 +78,7 @@ object GroovyScripts {
         // Inject the values via a new BaseScript so user's can have completion.
         script match {
           case baseScript: BaseScript =>
-            baseScript.setValues(logger, targetStage, baseDir, properties, fileIO, restAPI(properties))
+            baseScript.setValues(logger, targetStage, baseDir, properties, fileIO, translator)
           case _ =>
             throw new ManipulationException("Cannot cast {} to a BaseScript to set values.", script)
         }
