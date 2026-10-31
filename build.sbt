@@ -45,6 +45,8 @@ libraryDependencies ++= Seq(
   // commons-logging API for PME's REST client (httpclient), routed to slf4j: it used to come from Galley,
   // which is excluded below, and commons-logging itself is excluded as it breaks on sbt's older log4j
   "org.slf4j" % "jcl-over-slf4j" % "2.0.18",
+  // overrides the 2.22.3 from PME for CVE-2026-110879; a direct dependency, unlike dependencyOverrides, is in the POM
+  "com.fasterxml.jackson.core" % "jackson-databind" % "2.22.4",
   "org.scalactic" %% "scalactic" % "3.2.20",
   "org.scalatest" %% "scalatest" % "3.2.20" % "test"
 )
