@@ -8,62 +8,6 @@ import scala.collection.JavaConverters._
 
 class PmeRestClient(translator: Translator) extends RestClient {
 
-
-  //  def apply(config: RestConfig): Translator = {
-  //    import config._
-  //    new DefaultTranslator(
-  //      restUrl.get,
-  //      restMaxSize,
-  //      restMinSize,
-  //      brewPullActive,
-  //      mode,
-  //      getRestHeadersAsJavaMap,
-  //      restConnectionTimeout,
-  //      restSocketRetry,
-  //      restRetryDuration
-  //    )
-  //  }
-
-  //  def getClient(): DefaultTranslator = {
-  //    val restUrl = "http://da-master-devel.psi.redhat.com/da/rest/v-1/"
-  //    val brewPullActive = false
-  //    val mode = "PERSISTENT"
-  //    val restMaxSize = -1
-  //    val restMinSize = Translator.CHUNK_SPLIT_COUNT
-  //    val restHeaders = mapAsJavaMap(Map[String,String]()) //Map.empty
-  //    val restConnectionTimeout = Translator.DEFAULT_CONNECTION_TIMEOUT_SEC
-  //    val restSocketTimeout = Translator.DEFAULT_SOCKET_TIMEOUT_SEC
-  //    val restRetryDuration = Translator.RETRY_DURATION_SEC
-  //
-  //
-  //    val restEndpoint = new DefaultTranslator(
-  //      restUrl,
-  //      restMaxSize,
-  //      restMinSize,
-  //      brewPullActive,
-  //      mode,
-  //      restHeaders,
-  //      restConnectionTimeout,
-  //      restSocketTimeout,
-  //      restRetryDuration)
-  //
-  //
-  //    restEndpoint
-  //  }
-  //    new DefaultTranslator(
-  //      configuration.daEndpoint(),
-  //      configuration.restMaxSize(),
-  //      Translator.CHUNK_SPLIT_COUNT,
-  //      configuration.restRepositoryGroup(),
-  //      configuration.restBrewPullActive(),
-  //      configuration.restMode(),
-  //      configuration.versionIncrementalSuffix(),
-  //      configuration.restHeaders(),
-  //      configuration.restConnectionTimeout(),
-  //      configuration.restSocketTimeout(),
-  //      configuration.restRetryDuration());
-  //  }
-
   override def lookupProjectVersion(gav: GAV): String = {
     lookupProjectVersions(Set(gav)).head._2
   }
