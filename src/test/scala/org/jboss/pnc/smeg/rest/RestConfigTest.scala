@@ -20,7 +20,7 @@ class RestConfigTest extends UnitSpec {
     val defaultRestConfig = RestConfig(
       restUrl = None,
       brewPullActive = false,
-      mode = null,
+      mode = "",
       restMaxSize = -1,
       restMinSize = Translator.CHUNK_SPLIT_COUNT,
       restHeaders = Map[String, String](),
