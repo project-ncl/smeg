@@ -2,7 +2,6 @@ import sbt.Keys.versionScheme
 import sbt._
 
 ThisBuild / scalaVersion     := "2.12.13"
-ThisBuild / version          := "0.4.0.0-SNAPSHOT"
 ThisBuild / organization     := "org.jboss.pnc.smeg"
 ThisBuild / organizationName := "Project NCL"
 
@@ -113,8 +112,41 @@ ThisBuild / publishTo := {
   if (isSnapshot.value) {
     Some("Sonatype Nexus Repository Manager" at "https://central.sonatype.com/repository/maven-snapshots/")
   } else {
-    None
+    // staged locally, then uploaded to the Sonatype Central Portal by sonaRelease
+    localStaging.value
   }
+}
+
+// Metadata required by Maven Central
+ThisBuild / description := "SBT manipulation tool in the style of PME"
+ThisBuild / homepage := Some(url("https://github.com/project-ncl/smeg"))
+ThisBuild / licenses := List("Apache License, Version 2.0" -> url("https://www.apache.org/licenses/LICENSE-2.0.html"))
+ThisBuild / scmInfo := Some(ScmInfo(url("https://github.com/project-ncl/smeg"), "scm:git:git@github.com:project-ncl/smeg.git"))
+ThisBuild / developers := List(
+  Developer("project-ncl", "Project NCL", "pnc-bot-release@redhat.com", url("https://github.com/project-ncl"))
+)
+
+// tags without the "v" prefix of sbt-release, like the previous releases
+releaseTagName := (ThisBuild / version).value
+
+// `sbt "release with-defaults"` (see .github/workflows/sbt-release.yml): releases the version of version.sbt without
+// -SNAPSHOT, then sets the next snapshot version (e.g. 0.4.0.0 -> 0.4.0.1-SNAPSHOT)
+releaseProcess := {
+  import sbtrelease.ReleaseStateTransformations._
+  Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    runClean,
+    runTest,
+    setReleaseVersion,
+    commitReleaseVersion, // its check, run before any step, aborts on uncommitted changes
+    tagRelease,
+    releaseStepCommand("publishSigned"),
+    releaseStepCommand("sonaRelease"),
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  )
 }
 
 

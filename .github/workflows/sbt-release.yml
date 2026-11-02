@@ -1,0 +1,125 @@
+name: "0 Central Release Job" # Adding the 0 so that it's on top of the list of github actions
+
+# Same steps as the sbt-release.yml proposed for project-ncl/shared-github-actions: once it works here, this can call
+# the shared workflow instead.
+
+permissions:
+  contents: read
+
+on:
+  workflow_dispatch: # Manual trigger so you don't release on every push
+    inputs:
+      ref_to_release:
+        description: '[Optional] Branch to release. Default: Github default branch'
+        required: false
+        type: string
+        # default has to be a static string, no variables allowed
+        default: ''
+      release_version:
+        description: '[Optional] Version to release. Default: the version in version.sbt without -SNAPSHOT'
+        required: false
+        type: string
+        default: ''
+      next_version:
+        description: '[Optional] Next snapshot version. Default: the released version with its last number incremented'
+        required: false
+        type: string
+        default: ''
+
+# queue, don't cancel, a second release of the same ref: cancelling a run midway (e.g. after sonaRelease, before
+# pushChanges) would leave a version published on Maven Central without its tag and version commits
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: github.repository == 'project-ncl/smeg'
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # Allows pushing tags and commits
+
+    env:
+      FINAL_REF: ${{ inputs.ref_to_release || github.event.repository.default_branch }}
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: "${{ env.FINAL_REF }}"
+          fetch-depth: 1
+          persist-credentials: false
+          fetch-tags: true
+
+      - name: Configure Git User
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Set up JDK 8
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: "8"
+          distribution: "temurin"
+          cache: sbt
+          # imports the key into the gpg keyring, used by sbt-pgp
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+
+      - name: Setup SBT
+        uses: sbt/setup-sbt@2e222825582620cc38d2a54e674f3c01b7c14f5d # v1.1.24
+
+      - name: Configure Resolvers and Sonatype credentials
+        shell: bash
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        run: |
+          mkdir -p "$HOME/.sbt/1.0"
+          printf '%s\n' \
+          'resolvers ++= Seq(' \
+          '    "Sonatype Snapshots" at "https://central.sonatype.com/repository/maven-snapshots",' \
+          '    "Artima" at "https://repo.artima.com/releases",' \
+          '    "MRRC" at "https://maven.repository.redhat.com/ga/"' \
+          ')' > "$HOME/.sbt/1.0/resolvers.sbt"
+          printf '%s\n' \
+          "realm=Sonatype Nexus Repository Manager" \
+          "host=central.sonatype.com" \
+          "user=$SONATYPE_USERNAME" \
+          "password=$SONATYPE_PASSWORD" > "$HOME/.sbt/.credentials"
+
+      - name: Set git remote to HTTPS token URL
+        run: git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Run sbt-release
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          NEXT_VERSION: ${{ inputs.next_version }}
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          PGP_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          RELEASE_ARGS="with-defaults"
+          if [ -n "${RELEASE_VERSION}" ]; then
+            RELEASE_ARGS="${RELEASE_ARGS} release-version ${RELEASE_VERSION}"
+          fi
+          if [ -n "${NEXT_VERSION}" ]; then
+            RELEASE_ARGS="${RELEASE_ARGS} next-version ${NEXT_VERSION}"
+          fi
+          sbt -v -Dfile.encoding=UTF8 "release ${RELEASE_ARGS}" < /dev/null
+
+      - name: Create the GH Release
+        run: |
+          TAGS=$(git tag --sort=-creatordate | head -n 2)
+          LATEST_TAG=$(echo "$TAGS" | sed -n '1p')
+          PREVIOUS_TAG=$(echo "$TAGS" | sed -n '2p')
+          if [ -n "${PREVIOUS_TAG}" ]; then
+            echo "Creating release notes between ${LATEST_TAG} and ${PREVIOUS_TAG}"
+            gh release create --target "${FINAL_REF}" --generate-notes --notes-start-tag "${PREVIOUS_TAG}" "${LATEST_TAG}"
+          else
+            gh release create --target "${FINAL_REF}" --generate-notes "${LATEST_TAG}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
