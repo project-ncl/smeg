@@ -5,7 +5,7 @@ SMEg is an SBT manipulation tool in the style of PME that aims to keep a consist
 ## Installation in a project
 Add the following to your `./project/plugins.sbt` file:
 
-`addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.4.0.0")`
+`addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.4.0.1")`
 
 Change the final string to match the version you wish to use. Releases up to 0.3.1.0 were published as `org.jboss.pnc`. Snapshots are published to https://central.sonatype.com/repository/maven-snapshots.
 
@@ -14,9 +14,14 @@ Create the following file:
 `~/.sbt/1.0/plugins/build.sbt`
 
 With the following content:
-`addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.4.0.0")`
+`addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.4.0.1")`
 
 Change the final string to match the version you wish to use
+
+## sbt older than 1.9
+Since 0.4.0.0 SMEG is published only with the Maven compliant file names of sbt 1.9 (`smeg-plugin_2.12_1.0-<version>.pom`), as the legacy ones are rejected by Maven Central. `addSbtPlugin` in sbt < 1.9 looks only for the legacy names and fails to resolve it: declare the plugin as a plain dependency instead, in place of each `addSbtPlugin` line of this README (this works with any sbt 1.x):
+
+`libraryDependencies += "org.jboss.pnc.smeg" % "smeg-plugin_2.12_1.0" % "0.4.0.1"`
 
 ## Extra repositories
 Sbt will need access to some additional repositories in order to satisfy all of SMEg's dependencies.
@@ -98,7 +103,7 @@ They have to run before sbt reads the project's own build definition, so they ar
 
 `~/.sbt/1.0/plugins/project/plugins.sbt`:
 ```
-addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.4.0.0")
+addSbtPlugin("org.jboss.pnc.smeg" %% "smeg-plugin" % "0.4.0.1")
 ```
 
 `~/.sbt/1.0/plugins/smeg-groovy.sbt`:
