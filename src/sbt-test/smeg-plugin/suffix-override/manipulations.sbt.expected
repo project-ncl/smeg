@@ -1,1 +1,2 @@
 ThisBuild / version := "0.1.0.redhat-5"
+version := "0.1.0.redhat-5"
