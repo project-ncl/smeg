@@ -108,6 +108,10 @@ pomExtra :=
     </repository>
   </repositories>
 
+// sbt < 1.9 resolves sbt plugins only by the legacy file names (smeg-plugin-<version>.pom/.jar): publish them too, as
+// sbt does by default (aether-deploy turns it off)
+sbtPluginPublishLegacyMavenStyle := true
+
 ThisBuild / publishTo := {
   if (isSnapshot.value) {
     Some("Sonatype Nexus Repository Manager" at "https://central.sonatype.com/repository/maven-snapshots/")
