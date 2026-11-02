@@ -236,3 +236,6 @@ $ sbt manipulate -DversionOsgi=false
 
 **The default is: `true`**.
 
+
+## Releasing
+Releases are published to Maven Central by the GitHub Actions workflow "0 Central Release Job" (`.github/workflows/sbt-release.yml`), started manually from the Actions tab. It releases the version of `version.sbt` without `-SNAPSHOT` (or the given one), tags it, publishes the signed artifacts to the Sonatype Central Portal and sets the next snapshot version. Snapshots are published by "Build snapshot version and upload" on every push to `main`.

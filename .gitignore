@@ -1,5 +1,9 @@
 target/
 
+# POM written by makePom for Mend (see build.sbt), and its signature when releasing
+/pom.xml
+/smeg-plugin_*.pom*
+
 ### Eclipse ###
 .metadata
 bin/
