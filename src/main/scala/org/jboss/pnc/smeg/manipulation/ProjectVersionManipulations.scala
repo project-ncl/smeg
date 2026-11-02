@@ -1,5 +1,6 @@
 package org.jboss.pnc.smeg.manipulation
 
+import org.jboss.pnc.mavenmanipulator.core.state.VersioningState
 import org.jboss.pnc.smeg.model.GAV
 import org.jboss.pnc.smeg.rest.{RestClient, RestConfig}
 import org.jboss.pnc.smeg.state.SmegSystemProperties.{FORCE_ROOT_GA, VERSION_SUFFIX_SETTING}
@@ -13,6 +14,13 @@ object ProjectVersionManipulations {
   def calculateAndSet(session: ManipulationSession, spec: ManipulationSpec): Unit = {
 
     val props = System.getProperties
+
+    // Like PME: no version change with versionModification=false, or without versionSuffix, versionIncrementalSuffix,
+    // versionOverride or enforceVersionPrefix
+    if (!new VersioningState(props).isEnabled) {
+      session.getLogger.info("Version manipulation is disabled, keeping the project version")
+      return
+    }
 
     val calc = new SbtVersionCalculator
 

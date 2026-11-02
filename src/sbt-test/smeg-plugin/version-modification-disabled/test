@@ -1,0 +1,7 @@
+> runTest
+$ exists manipulations.sbt
+> verifyTest
+
+# the project version is unchanged after reloading the build
+> reload
+> verifyVersion
