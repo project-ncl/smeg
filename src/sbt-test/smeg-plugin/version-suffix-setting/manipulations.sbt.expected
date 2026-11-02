@@ -1,2 +1,4 @@
 ThisBuild / baseVersion := "5.0.0"
+baseVersion := "5.0.0"
 ThisBuild / baseVersionSuffix := "rebuild-00001"
+baseVersionSuffix := "rebuild-00001"

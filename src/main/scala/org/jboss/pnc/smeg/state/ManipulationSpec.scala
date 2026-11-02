@@ -3,8 +3,15 @@ package org.jboss.pnc.smeg.state
 class ManipulationSpec {
   private val manipulations = Seq.newBuilder[String]
 
+  /**
+   * Sets the key in ThisBuild, for the projects inheriting it, and unscoped, for the root project: a project setting
+   * (e.g. a plain `version := "1.0"` in build.sbt) wins over ThisBuild, while the unscoped one in manipulations.sbt
+   * wins over it. This relies on sbt loading *.sbt files in lexical order (current behaviour, not documented), so an
+   * unscoped setting in a file sorting after manipulations.sbt would override it.
+   */
   def overrideSetting(key: String, value: String): Unit = {
     manipulations += s"""ThisBuild / ${key} := \"${value}\""""
+    manipulations += s"""${key} := \"${value}\""""
   }
 
   def toSeq: Seq[String] = {

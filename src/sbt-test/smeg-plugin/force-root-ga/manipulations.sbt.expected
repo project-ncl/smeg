@@ -1,1 +1,2 @@
 ThisBuild / baseVersion := "5.0.0.rebuild-00001"
+baseVersion := "5.0.0.rebuild-00001"

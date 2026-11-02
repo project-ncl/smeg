@@ -36,7 +36,7 @@ resolvers ++= Seq(
 ```
 
 ## Usage
-Smeg is designed to be run as a pre-build step before you execute your build. It will output the necessary manipulations to a file named `smeg.manipulations.sbt` which defines the manipulations that will be applied at build time.
+Smeg is designed to be run as a pre-build step before you execute your build. It will output the necessary manipulations to a file named `manipulations.sbt` which defines the manipulations that will be applied at build time. Each setting is set both in `ThisBuild`, for the projects inheriting it, and unscoped, so that it also wins over a setting of the root project (e.g. `version := "1.0"` in `build.sbt`). This relies on sbt loading `*.sbt` files in lexical order (current behaviour, not documented), so an unscoped setting in a file sorting after `manipulations.sbt` would override it. Subprojects that set their own `version` are not aligned.
 
 To run Smeg use the following command:
 ```
