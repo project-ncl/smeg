@@ -35,6 +35,10 @@ updates:
         - "org.jboss.da:*"
         - "org.jboss.pnc*:*"        # match org.jboss.pnc:xyz and org.jboss.pnc.group:xyz
         - "org.commonjava*:*"       # match org.commonjava:xyz and org.commonjava.group:xyz
+    ignore:
+      # sbt 1.x plugins must be built with Scala 2.12: only accept 2.12.x patch releases
+      - dependency-name: "org.scala-lang:scala-library"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
   # - package-ecosystem: "maven"
   #   directory: "/" # Location of package manifests
   #   schedule:
