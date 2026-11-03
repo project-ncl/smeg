@@ -19,12 +19,6 @@ lazy val openTelemetrySpecific = {
   )
 }
 
-// Define local resolver to fix SBT 1.9.9 issue
-val localRepoDir = file("project/hack/repository")
-resolvers += "Local Repository" at s"file://${localRepoDir.getAbsolutePath}"
-
-libraryDependencies += "org.jboss.da" % "reports-model" % "4.0.0"
-
 // Define resolvers
 resolvers ++= Seq(
   "RedHat GA" at "https://maven.repository.redhat.com/ga/",
@@ -35,7 +29,6 @@ resolvers ++= Seq(
 
 // Define dependencies
 libraryDependencies ++= Seq(
-  "org.jboss.bom" % "eap-runtime-artifacts" % "7.3.1.GA" pomOnly(),
   "com.softwaremill.sttp.client3" %% "core" % "3.11.0",
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-core" % versionPme,
   "org.jboss.pnc.maven-manipulator" % "pom-manipulation-io" % versionPme,
@@ -58,11 +51,6 @@ excludeDependencies ++= Seq(
   ExclusionRule("ch.qos.logback", "logback-classic"),
   ExclusionRule("ch.qos.logback", "logback-core"),
   ExclusionRule("org.commonjava.maven.galley")
-)
-
-// Exclude specific transitive dependencies globally (to solve SBT 1.9.9 issues)
-excludeDependencies ++= Seq(
-  ExclusionRule("org.jboss.da", "reports-model")
 )
 
 assembly / assemblyMergeStrategy := {
