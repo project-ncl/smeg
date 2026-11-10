@@ -66,7 +66,7 @@ jobs:
           gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
 
       - name: Setup SBT
-        uses: sbt/setup-sbt@2e222825582620cc38d2a54e674f3c01b7c14f5d # v1.1.24
+        uses: sbt/setup-sbt@b113b960ba361e87e08ce02a390d51871b7ee459 # v1.5.13
 
       - name: Configure Resolvers and Sonatype credentials
         shell: bash
