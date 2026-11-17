@@ -244,3 +244,9 @@ $ sbt manipulate -DversionOsgi=false
 
 ## Releasing
 Releases are published to Maven Central by the GitHub Actions workflow "0 Central Release Job" (`.github/workflows/sbt-release.yml`), started manually from the Actions tab. It releases the version of `version.sbt` without `-SNAPSHOT` (or the given one), tags it, publishes the signed artifacts to the Sonatype Central Portal and sets the next snapshot version. Snapshots are published by "Build snapshot version and upload" on every push to `main`.
+
+`main` only accepts changes through pull requests, so the workflow cannot push its version commits there. To release:
+
+1. Cut a release branch from an up-to-date `main`, e.g. for 0.4.0.2: `git push origin origin/main:refs/heads/release-0.4.0.2`
+2. Run "0 Central Release Job" with `ref_to_release` set to that branch, e.g. `gh workflow run sbt-release.yml -R project-ncl/smeg -f ref_to_release=release-0.4.0.2`. Leave the versions empty to release the version of `version.sbt`.
+3. The workflow pushes the version commits and the tag to the release branch, then opens a PR to `main` with them. Merge it with a merge commit (not squash), so the tag stays in the history of `main`, and before cutting the next release branch, so that `version.sbt` on `main` is already the next snapshot version.
