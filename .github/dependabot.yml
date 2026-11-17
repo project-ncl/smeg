@@ -39,6 +39,9 @@ updates:
       # sbt 1.x plugins must be built with Scala 2.12: only accept 2.12.x patch releases
       - dependency-name: "org.scala-lang:scala-library"
         update-types: ["version-update:semver-major", "version-update:semver-minor"]
+      # this is an sbt 1.x plugin (Scala 2.12): sbt 2.x requires Scala 3, so only accept sbt 1.x updates
+      - dependency-name: "org.scala-sbt:sbt"
+        update-types: ["version-update:semver-major"]
   # - package-ecosystem: "maven"
   #   directory: "/" # Location of package manifests
   #   schedule:
@@ -63,3 +66,5 @@ updates:
     # a compromised new version
     cooldown:
       default-days: 7
+      exclude:
+        - "project-ncl/shared-github-actions/*"
