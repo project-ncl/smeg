@@ -39,6 +39,7 @@ jobs:
 
     permissions:
       contents: write # Allows pushing tags and commits
+      pull-requests: write # Opens the PR that brings the version commits back to the default branch
 
     env:
       FINAL_REF: ${{ inputs.ref_to_release || github.event.repository.default_branch }}
@@ -123,3 +124,19 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # The default branch only accepts changes through pull requests, so releases run on a release-<version> branch
+      # and pushChanges pushes the version commits there. Open a PR to bring them back, so that version.sbt on the
+      # default branch moves to the next snapshot version. Merge it with a merge commit (not squash), so that the
+      # release tag stays in the default branch's history.
+      - name: Open a PR to bring the version commits back to the default branch
+        if: env.FINAL_REF != github.event.repository.default_branch
+        run: |
+          RELEASED=$(git tag --sort=-creatordate | head -n 1)
+          NEXT=$(sed -n 's/.*version := "\(.*\)".*/\1/p' version.sbt)
+          gh pr create --repo "${GITHUB_REPOSITORY}" --base "${DEFAULT_BRANCH}" --head "${FINAL_REF}" \
+            --title "Set version to ${NEXT} after releasing ${RELEASED}" \
+            --body "Version commits of the ${RELEASED} release, made on \`${FINAL_REF}\`. Merge with a merge commit (not squash), so the ${RELEASED} tag stays in the history of \`${DEFAULT_BRANCH}\`."
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
